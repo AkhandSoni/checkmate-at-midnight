@@ -12,7 +12,7 @@ A scrap of cloth. An interrupted account. A detail that sounded harmless the fir
 
 You are Detective Knight. Walk the rooms, question the household and decide what the evidence actually proves. You only get one question at each interrogation. Choose carefully.
 
-**[Enter Blackrook Manor →](https://checkmate-at-midnight.checkmate-at-midnight.workers.dev/)**
+**[Enter Blackrook Manor →](https://akhandsoni.github.io/checkmate-at-midnight/)**
 
 ## Inside the manor
 
