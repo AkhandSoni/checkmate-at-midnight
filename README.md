@@ -83,3 +83,14 @@ The tests cover the story rules, tree structure, DFS/BFS, save validation and ch
 Players need no installation, backend, account or Blender. The game uses TypeScript, Three.js, Vite and browser LocalStorage. Asset credits and licences are in [ASSET_CREDITS.md](ASSET_CREDITS.md) and [public/legal/](public/legal).
 
 The story guide and full route catalogue are intentionally kept out of this repository. Discover the night for yourself.
+
+## Deploy to Cloudflare Workers
+
+The game uses Workers static assets; no backend Worker or database is required.
+
+```bash
+npx --yes wrangler@4.153.0 login
+npm run deploy
+```
+
+For Cloudflare Git integration, connect this repository with build command `npm run build` and deploy command `npx wrangler@4.153.0 deploy`. Leave `BASE_PATH` unset: Workers serves this build at the domain root. The `wrangler.jsonc` configuration publishes only `dist/`; the story guide and local authoring files are not uploaded.
