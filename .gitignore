@@ -1,0 +1,22 @@
+node_modules/
+dist/
+*.blend1
+test-results/
+
+# Local handoff, authoring sources, rejected assets and QA captures.
+/Checkmate_Complete_Codex_Pack/
+/assets/
+/screenshots/
+/tools/
+/IMPLEMENTATION_STATUS.md
+/STORY_KEYPOINTS_AND_DSA.txt
+/PATH_REFERENCE.txt
+/tests/narrative.test.mjs
+
+# Local build products and credentials never belong in the assignment repo.
+/deployment/
+.env
+.env.*
+*.log
+.DS_Store
+/ASSET_COVERAGE.md

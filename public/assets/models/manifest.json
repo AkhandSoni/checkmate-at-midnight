@@ -1,0 +1,87 @@
+{
+  "CHR_knight": {
+    "file": "CHR_knight.glb",
+    "meshes": 10,
+    "triangles": 11204
+  },
+  "CHR_scarlet": {
+    "file": "CHR_scarlet.glb",
+    "meshes": 9,
+    "triangles": 13812
+  },
+  "CHR_king": {
+    "file": "CHR_king.glb",
+    "meshes": 10,
+    "triangles": 16302
+  },
+  "CHR_ash": {
+    "file": "CHR_ash.glb",
+    "meshes": 7,
+    "triangles": 6670
+  },
+  "CHR_voss": {
+    "file": "CHR_voss.glb",
+    "meshes": 12,
+    "triangles": 12270
+  },
+  "CHR_flint": {
+    "file": "CHR_flint.glb",
+    "meshes": 10,
+    "triangles": 13130
+  },
+  "CHR_mara": {
+    "file": "CHR_mara.glb",
+    "meshes": 6,
+    "triangles": 9080
+  },
+  "CHR_king_fallen": {
+    "file": "CHR_king_fallen.glb",
+    "meshes": 10,
+    "triangles": 16302
+  },
+  "PROP_coronet": {
+    "file": "PROP_coronet.glb",
+    "meshes": 1,
+    "triangles": 448
+  },
+  "PROP_bishop_token": {
+    "file": "PROP_bishop_token.glb",
+    "meshes": 1,
+    "triangles": 550
+  },
+  "PROP_open_letter": {
+    "file": "PROP_open_letter.glb",
+    "meshes": 3,
+    "triangles": 496
+  },
+  "ROOM_study": {
+    "file": "ROOM_study.glb",
+    "meshes": 13,
+    "triangles": 31424
+  },
+  "ROOM_drawing": {
+    "file": "ROOM_drawing.glb",
+    "meshes": 15,
+    "triangles": 11908
+  },
+  "ROOM_library": {
+    "file": "ROOM_library.glb",
+    "meshes": 14,
+    "triangles": 53248
+  },
+  "ROOM_dining": {
+    "file": "ROOM_dining.glb",
+    "meshes": 12,
+    "triangles": 18924
+  },
+  "ROOM_servants": {
+    "file": "ROOM_servants.glb",
+    "meshes": 12,
+    "triangles": 11656
+  },
+  "ROOM_entrance": {
+    "file": "ROOM_entrance.glb",
+    "meshes": 16,
+    "triangles": 7536
+  }
+}

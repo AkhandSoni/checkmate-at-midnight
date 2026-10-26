@@ -1,0 +1,111 @@
+{
+  "units": "meters",
+  "roomSize": [8, 8],
+  "wallHeight": 3.8,
+  "wallThickness": 0.22,
+  "doorWidth": 1.8,
+  "rooms": [
+    {
+      "id": "entrance",
+      "name": "Entrance Hall",
+      "origin": [0, 0],
+      "bounds": [0, 0, 8, 8],
+      "floorTile": 1,
+      "suspect": "flint"
+    },
+    {
+      "id": "study",
+      "name": "King’s Study",
+      "origin": [8, 0],
+      "bounds": [8, 0, 16, 8],
+      "floorTile": 1,
+      "suspect": null
+    },
+    {
+      "id": "drawing",
+      "name": "Drawing Room",
+      "origin": [16, 0],
+      "bounds": [16, 0, 24, 8],
+      "floorTile": 1,
+      "suspect": "scarlet"
+    },
+    {
+      "id": "library",
+      "name": "Library",
+      "origin": [0, 8],
+      "bounds": [0, 8, 8, 16],
+      "floorTile": 1,
+      "suspect": "voss"
+    },
+    {
+      "id": "dining",
+      "name": "Dining Room",
+      "origin": [8, 8],
+      "bounds": [8, 8, 16, 16],
+      "floorTile": 1,
+      "suspect": "ash"
+    },
+    {
+      "id": "servants",
+      "name": "Servants’ Room",
+      "origin": [16, 8],
+      "bounds": [16, 8, 24, 16],
+      "floorTile": 1,
+      "suspect": "mara"
+    }
+  ],
+  "connections": [
+    {
+      "a": "entrance",
+      "b": "study",
+      "doorCenter": [8, 4]
+    },
+    {
+      "a": "study",
+      "b": "drawing",
+      "doorCenter": [16, 4]
+    },
+    {
+      "a": "entrance",
+      "b": "library",
+      "doorCenter": [4, 8]
+    },
+    {
+      "a": "study",
+      "b": "dining",
+      "doorCenter": [12, 8]
+    },
+    {
+      "a": "drawing",
+      "b": "servants",
+      "doorCenter": [20, 8]
+    },
+    {
+      "a": "library",
+      "b": "dining",
+      "doorCenter": [8, 12]
+    },
+    {
+      "a": "dining",
+      "b": "servants",
+      "doorCenter": [16, 12]
+    }
+  ],
+  "spawn": [3, 2],
+  "king": [11.2, 3.6],
+  "suspectPositions": {
+    "flint": [5, 5],
+    "scarlet": [20, 4],
+    "ash": [13, 12],
+    "mara": [20, 12],
+    "voss": [4, 12]
+  },
+  "camera": {
+    "projection": "orthographic",
+    "verticalAngleDegrees": 55,
+    "azimuthDegrees": 45,
+    "viewHeightMeters": 13,
+    "near": 0.1,
+    "far": 150
+  }
+}

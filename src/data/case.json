@@ -1,0 +1,389 @@
+{
+  "version": 1,
+  "title": "Checkmate at Midnight",
+  "letter": "Detective Knight,\n\nMy husband has summoned our household for an announcement tonight. Since then, he has dismissed his guards, accused old friends, and begun locking his study.\n\nThis evening, I found a note beneath his door:\n“Before dawn, your reign ends.”\n\nHe calls it a childish threat. I fear he is wrong.\nPlease come to Blackrook Manor before midnight.\n\n—Lady Scarlet",
+  "arrival": [
+    {
+      "speaker": "Flint",
+      "text": "You’re late, Detective."
+    },
+    {
+      "speaker": "Knight",
+      "text": "For the appointment?"
+    },
+    {
+      "speaker": "Flint",
+      "text": "For the man."
+    },
+    {
+      "speaker": "Scarlet",
+      "text": "I asked you to prevent a murder."
+    },
+    {
+      "speaker": "Knight",
+      "text": "Then help me prevent the next mistake."
+    }
+  ],
+  "initial": {
+    "prompt": "Where do you begin?",
+    "choices": [
+      {
+        "label": "Examine the wound.",
+        "response": "Little blood surrounds the injury. The letter opener bears Ash’s crest.",
+        "evidence": ["low_bleeding", "weapon_origin"]
+      },
+      {
+        "label": "Examine the goblet.",
+        "response": "Pale residue clings to the rim beside the King’s usual medicine bottle.",
+        "evidence": ["goblet_residue"]
+      }
+    ]
+  },
+  "orders": {
+    "0": ["scarlet", "ash", "mara", "flint", "voss"],
+    "1": ["mara", "ash", "flint", "scarlet", "voss"]
+  },
+  "suspects": [
+    {
+      "id": "scarlet",
+      "name": "Lady Scarlet",
+      "piece": "queen",
+      "room": "drawing",
+      "opening": "Yes, the fabric is mine. Surely you expected the murderer to choose someone else’s colour?",
+      "choices": [
+        {
+          "label": "Explain the torn shawl.",
+          "response": "I argued with him. I had packed to leave, and he threatened to cut me off. I tore the shawl on a dining chair, not in his study. If you have already decided, why ask?",
+          "evidence": ["scarlet_motive"]
+        },
+        {
+          "label": "Why were you leaving?",
+          "response": "Because I could no longer bear this house. My carriage was booked three days ago. Voss went into the study after dinner carrying a ledger. When I saw him later, he carried nothing.",
+          "evidence": ["scarlet_departure", "voss_visit"]
+        }
+      ]
+    },
+    {
+      "id": "ash",
+      "name": "Prince Ash",
+      "piece": "pawn",
+      "room": "dining",
+      "opening": "He could make you feel small without ever leaving his chair.",
+      "choices": [
+        {
+          "label": "Your crest is on the weapon.",
+          "response": "It was my gift to him. Yes, I took the new will. He had removed me as heir. But anyone could have picked up that opener.",
+          "evidence": ["ash_motive", "weapon_origin"]
+        },
+        {
+          "label": "What was the last thing your father said?",
+          "response": "He drank and said Mara had made his medicine bitter enough to kill him. I thought he was insulting her again. I wrote the note, Detective. I wanted to frighten him, not kill him.",
+          "evidence": ["bitter_wine", "ash_threat"]
+        }
+      ]
+    },
+    {
+      "id": "mara",
+      "name": "Mara",
+      "piece": "pawn",
+      "room": "servants",
+      "opening": "I found him. That is all. Why does everyone keep saying it like a confession?",
+      "choices": [
+        {
+          "label": "Only you had access to the medicine.",
+          "response": "I prepared his normal dose, as I do every night. The strong draught is missing. I do not know how. If I say another word you will turn that against me too.",
+          "evidence": ["mara_access"]
+        },
+        {
+          "label": "Describe exactly what you saw.",
+          "response": "He was on the floor. The opener was already in his chest. I ran to fetch her ladyship. The folding screen moved although the window was shut. And Voss borrowed my keys this afternoon—for a library cabinet, he said.",
+          "evidence": ["screen_witness", "borrowed_keys"]
+        }
+      ]
+    },
+    {
+      "id": "flint",
+      "name": "Captain Flint",
+      "piece": "rook",
+      "room": "entrance",
+      "opening": "Nobody entered from outside. On that, I will stake my life.",
+      "choices": [
+        {
+          "label": "Why did you leave your post?",
+          "response": "Ash paid me to leave a side door unguarded. He said he needed to get a document out. If he returned through it, I would not have seen him. I should never have taken the money.",
+          "evidence": ["flint_bribe"]
+        },
+        {
+          "label": "What did you see when you returned?",
+          "response": "Voss, leaving the study corridor. He asked if the gates were locked. Strange question for a man who said he was going to bed. I hid that because it exposed my absence.",
+          "evidence": ["flint_saw_voss"]
+        }
+      ]
+    },
+    {
+      "id": "voss",
+      "name": "Chancellor Voss",
+      "piece": "bishop",
+      "room": "library",
+      "opening": "Private correspondence, Detective. Surely grief does not abolish privacy.",
+      "choices": [
+        {
+          "label": "Who benefits from the King’s death?",
+          "response": "A wife preparing to leave. A son stripped of his inheritance. You have seen the weapon and the shawl. Must I explain what they mean?",
+          "evidence": ["voss_deflection"]
+        },
+        {
+          "label": "Show me the estate accounts.",
+          "response": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+          "evidence": ["fraud", "voss_contradiction"]
+        }
+      ]
+    }
+  ],
+  "clues": [
+    {
+      "id": "red_thread",
+      "room": "drawing",
+      "text": "A thread caught on a nail in the dining chair matches Scarlet’s shawl. Her account of the tear is plausible.",
+      "localXZ": [-1.6, 1.3]
+    },
+    {
+      "id": "torn_will",
+      "room": "dining",
+      "text": "The hidden draft disinherits Ash. Motive is not proof of murder.",
+      "localXZ": [1.4, 0.8]
+    },
+    {
+      "id": "medicine_register",
+      "room": "servants",
+      "text": "The concentrated draught was nearly full this morning. Mara’s normal dose is separately recorded.",
+      "localXZ": [-1.7, 1.0]
+    },
+    {
+      "id": "duty_book",
+      "room": "entrance",
+      "text": "Flint’s departure began before the collapse. His absence explains why the delivery went unchallenged.",
+      "localXZ": [1.8, 1.2]
+    },
+    {
+      "id": "poison_flask",
+      "room": "library",
+      "text": "A travel flask in Voss’s document case bears the same distinctive residue and scent as the missing concentrated draught.",
+      "localXZ": [1.2, 0.7]
+    },
+    {
+      "id": "burned_accounts",
+      "room": "library",
+      "text": "An unburned account number matches a missing study-ledger page: estate funds were diverted into Voss’s holdings.",
+      "localXZ": [-1.3, 1.0]
+    },
+    {
+      "id": "study_ledger",
+      "room": "study",
+      "text": "The numbered ledger has missing leaves. Voss’s scheduled delivery is noted on its cover.",
+      "localXZ": [0.7, 0.8]
+    },
+    {
+      "id": "goblet_residue",
+      "room": "study",
+      "text": "The goblet has pale residue beside the King’s normal medicine bottle. It suggests an additional substance.",
+      "localXZ": [-1.2, -0.6]
+    }
+  ],
+  "evidence": {
+    "scarlet_motive": {
+      "title": "Scarlet Motive",
+      "source": "Lady Scarlet",
+      "text": "I argued with him. I had packed to leave, and he threatened to cut me off. I tore the shawl on a dining chair, not in his study. If you have already decided, why ask?",
+      "category": "testimony"
+    },
+    "scarlet_departure": {
+      "title": "Scarlet Departure",
+      "source": "Lady Scarlet",
+      "text": "Because I could no longer bear this house. My carriage was booked three days ago. Voss went into the study after dinner carrying a ledger. When I saw him later, he carried nothing.",
+      "category": "testimony"
+    },
+    "voss_visit": {
+      "title": "Voss Visit",
+      "source": "Lady Scarlet",
+      "text": "Because I could no longer bear this house. My carriage was booked three days ago. Voss went into the study after dinner carrying a ledger. When I saw him later, he carried nothing.",
+      "category": "testimony"
+    },
+    "ash_motive": {
+      "title": "Ash Motive",
+      "source": "Prince Ash",
+      "text": "It was my gift to him. Yes, I took the new will. He had removed me as heir. But anyone could have picked up that opener.",
+      "category": "testimony"
+    },
+    "weapon_origin": {
+      "title": "Weapon Origin",
+      "source": "Prince Ash",
+      "text": "It was my gift to him. Yes, I took the new will. He had removed me as heir. But anyone could have picked up that opener.",
+      "category": "testimony"
+    },
+    "bitter_wine": {
+      "title": "Bitter Wine",
+      "source": "Prince Ash",
+      "text": "He drank and said Mara had made his medicine bitter enough to kill him. I thought he was insulting her again. I wrote the note, Detective. I wanted to frighten him, not kill him.",
+      "category": "testimony"
+    },
+    "ash_threat": {
+      "title": "Ash Threat",
+      "source": "Prince Ash",
+      "text": "He drank and said Mara had made his medicine bitter enough to kill him. I thought he was insulting her again. I wrote the note, Detective. I wanted to frighten him, not kill him.",
+      "category": "testimony"
+    },
+    "mara_access": {
+      "title": "Mara Access",
+      "source": "Mara",
+      "text": "I prepared his normal dose, as I do every night. The strong draught is missing. I do not know how. If I say another word you will turn that against me too.",
+      "category": "testimony"
+    },
+    "screen_witness": {
+      "title": "Screen Witness",
+      "source": "Mara",
+      "text": "He was on the floor. The opener was already in his chest. I ran to fetch her ladyship. The folding screen moved although the window was shut. And Voss borrowed my keys this afternoon—for a library cabinet, he said.",
+      "category": "testimony"
+    },
+    "borrowed_keys": {
+      "title": "Borrowed Keys",
+      "source": "Mara",
+      "text": "He was on the floor. The opener was already in his chest. I ran to fetch her ladyship. The folding screen moved although the window was shut. And Voss borrowed my keys this afternoon—for a library cabinet, he said.",
+      "category": "testimony"
+    },
+    "flint_bribe": {
+      "title": "Flint Bribe",
+      "source": "Captain Flint",
+      "text": "Ash paid me to leave a side door unguarded. He said he needed to get a document out. If he returned through it, I would not have seen him. I should never have taken the money.",
+      "category": "testimony"
+    },
+    "flint_saw_voss": {
+      "title": "Flint Saw Voss",
+      "source": "Captain Flint",
+      "text": "Voss, leaving the study corridor. He asked if the gates were locked. Strange question for a man who said he was going to bed. I hid that because it exposed my absence.",
+      "category": "testimony"
+    },
+    "voss_deflection": {
+      "title": "Voss Deflection",
+      "source": "Chancellor Voss",
+      "text": "A wife preparing to leave. A son stripped of his inheritance. You have seen the weapon and the shawl. Must I explain what they mean?",
+      "category": "testimony"
+    },
+    "fraud": {
+      "title": "Fraud",
+      "source": "Chancellor Voss",
+      "text": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+      "category": "testimony"
+    },
+    "voss_contradiction": {
+      "title": "Voss Contradiction",
+      "source": "Chancellor Voss",
+      "text": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+      "category": "testimony"
+    },
+    "red_thread": {
+      "title": "Red Thread",
+      "source": "drawing",
+      "text": "A thread caught on a nail in the dining chair matches Scarlet’s shawl. Her account of the tear is plausible.",
+      "category": "physical"
+    },
+    "torn_will": {
+      "title": "Torn Will",
+      "source": "dining",
+      "text": "The hidden draft disinherits Ash. Motive is not proof of murder.",
+      "category": "physical"
+    },
+    "medicine_register": {
+      "title": "Medicine Register",
+      "source": "servants",
+      "text": "The concentrated draught was nearly full this morning. Mara’s normal dose is separately recorded.",
+      "category": "physical"
+    },
+    "duty_book": {
+      "title": "Duty Book",
+      "source": "entrance",
+      "text": "Flint’s departure began before the collapse. His absence explains why the delivery went unchallenged.",
+      "category": "physical"
+    },
+    "poison_flask": {
+      "title": "Poison Flask",
+      "source": "library",
+      "text": "A travel flask in Voss’s document case bears the same distinctive residue and scent as the missing concentrated draught.",
+      "category": "physical"
+    },
+    "burned_accounts": {
+      "title": "Burned Accounts",
+      "source": "library",
+      "text": "An unburned account number matches a missing study-ledger page: estate funds were diverted into Voss’s holdings.",
+      "category": "physical"
+    },
+    "study_ledger": {
+      "title": "Study Ledger",
+      "source": "study",
+      "text": "The numbered ledger has missing leaves. Voss’s scheduled delivery is noted on its cover.",
+      "category": "physical"
+    },
+    "goblet_residue": {
+      "title": "Goblet Residue",
+      "source": "study",
+      "text": "The goblet has pale residue beside the King’s normal medicine bottle. It suggests an additional substance.",
+      "category": "physical"
+    },
+    "low_bleeding": {
+      "title": "Little blood at the wound",
+      "source": "study",
+      "text": "The visible injury may have occurred after the King collapsed. This is a clue, not a complete medical conclusion.",
+      "category": "physical"
+    }
+  },
+  "endings": {
+    "scarlet": {
+      "title": "The Scarlet Verdict",
+      "text": "You present the torn shawl, the argument, and Scarlet’s plans to leave. “I wrote for help,” she says. “Remember that when you tell them what happened here.” Flint escorts her away. At dawn, Voss burns the remaining accounts. The camera reveals another red thread still caught on the dining-room chair.",
+      "epitaph": "You found a motive. Someone else supplied the evidence.",
+      "shot": "Scarlet crosses the entrance threshold; cut to the snagged thread and Voss at the hearth."
+    },
+    "ash": {
+      "title": "The Fallen Heir",
+      "text": "The threat, stolen will and family-crested weapon seem to form a complete story. Ash places his coronet on the dining table. “I wanted him to listen. Just once.” After his arrest, the camera returns to the goblet beneath the desk.",
+      "epitaph": "The threat was his. The murder was not.",
+      "shot": "Hold on the abandoned coronet, then rack attention to the goblet."
+    },
+    "mara": {
+      "title": "The Disposable Pawn",
+      "text": "Mara prepared the medicine, possessed the keys and discovered the body. “You asked who could have done it,” she says. “You never asked who used me.” She leaves her key ring on her bed. Voss volunteers to give a statement against her.",
+      "epitaph": "The smallest piece carried the blame for the largest crime.",
+      "shot": "Empty servants’ room, key ring on white linen; bishop’s shadow falls across the doorway."
+    },
+    "voss_free": {
+      "title": "The Bishop Walks Free",
+      "text": "You identify Voss, but your evidence does not tie him securely to the fatal drink and its delivery. “You have described suspicions, Detective,” he replies. “You were called here for proof.” He leaves pending further investigation. Days later, a parcel reaches your office. Inside is a black bishop.",
+      "epitaph": "You named the killer. You could not hold him.",
+      "shot": "Open gates at dawn, followed by a bishop resting on the opened letter."
+    },
+    "fire": {
+      "title": "The Burning Board",
+      "text": "You pursue Voss before securing the case. He burns the accounts and knocks a candle stand into the library curtain. Flint breaks down the door. You help evacuate the household while Voss escapes through the smoke. “Five lives saved,” you say. “One case lost.”",
+      "epitaph": "You brought everyone out except the truth.",
+      "shot": "Exterior entrance silhouette, safe household grouped outside, smoke at upper windows. No extra playable room."
+    },
+    "checkmate": {
+      "title": "Checkmate",
+      "text": "You assemble the household in the study. Voss calls the wound proof of a family quarrel. You set down the goblet. “The wound is where you wanted us to begin.” You connect the stolen draught, Voss’s access and visit, and the stolen accounts. The injury drew attention away from the drink. Flint takes the bishop into custody. “Did you know from the beginning?” Scarlet asks. “No,” you reply. “That is why I kept asking.”",
+      "epitaph": "Checkmate. The truth survives until morning.",
+      "shot": "Household tableau in study; detective slides a miniature knight beside the bishop on the desk chessboard."
+    }
+  },
+  "proofRule": {
+    "poison": ["poison_flask"],
+    "motiveAny": ["fraud", "burned_accounts"],
+    "opportunityAny": ["voss_visit", "flint_saw_voss", "borrowed_keys"]
+  },
+  "actions": [
+    "accuse_scarlet",
+    "accuse_ash",
+    "accuse_mara",
+    "accuse_voss",
+    "final_lead"
+  ]
+}
