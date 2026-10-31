@@ -1,5 +1,6 @@
 import "./style.css";
 import "./ui/chess-theme.css";
+import "./ui/mobile.css";
 import { assetUrl } from "./assets";
 import { World, type Target } from "./world";
 import { Sound } from "./audio";
@@ -8,6 +9,8 @@ import { drawChessPosition } from "./ui/chessboard";
 import { drawFloorPlan } from "./ui/floor-plan";
 import { ModelStage, characterModels } from "./ui/model-stage";
 import { navigateMenu } from "./ui/keyboard";
+import { TouchControls } from "./ui/touch-controls";
+import { roomRoute } from "./navigation";
 import { evidenceIcon } from "./ui/icons";
 import { TreeView } from "./ui/tree";
 import { el, text, eye, button, type Child } from "./ui/dom";
@@ -62,6 +65,7 @@ class Game {
   readonly world: World;
   readonly sound: Sound;
   private readonly modelStage: ModelStage;
+  private readonly touch: TouchControls;
   private viewerIndex = 0;
   private boardFrame = 0;
   private boardFlipped = false;
@@ -80,11 +84,21 @@ class Game {
   private speechActor: string | null = null;
   private navigation = "";
   private lastChoiceAt = 0;
+  private arrivalIndex = 0;
   private treeUI: TreeView;
   private caseActive = false;
   constructor() {
     this.world = new World(document.querySelector("#world")!, this.settings);
     this.sound = new Sound(this.settings);
+    this.touch = new TouchControls(
+      (right, down) => this.world.touchMove.set(right, down),
+      () => {
+        if (this.view === "world") this.interact();
+      },
+      () => {
+        if (this.view === "world") this.pause();
+      },
+    );
     this.modelStage = new ModelStage((name) =>
       this.world.cloneModelAsset(name),
     );
@@ -98,6 +112,10 @@ class Game {
     );
     this.world.onRoom = (id) => {
       if (this.stage === "world" && this.view === "world") {
+        if (this.navigation === id) {
+          this.navigation = "";
+          notify("Destination reached: " + roomName(id));
+        }
         this.save();
         this.sound.play("door_creak", 0.11);
         this.sound.room(id);
@@ -171,6 +189,7 @@ class Game {
     this.world.update(t);
     this.modelStage.render(this.settings.reducedMotion);
     this.updatePrompt();
+    this.touch.update(this.world.nearest);
     this.updateSpeechTail();
     requestAnimationFrame((n) => this.frame(n));
   }
@@ -184,6 +203,7 @@ class Game {
     this.speechBubble = null;
     this.speechActor = null;
     this.world.modal = true;
+    this.touch.setActive(false);
     hud.inert = true;
     this.world.clearKeys();
     this.view = view;
@@ -196,9 +216,11 @@ class Game {
     prompt.style.display = "none";
     this.sound.duck(view === "dialogue");
     queueMicrotask(() => {
-      const focus = ui.querySelector<HTMLElement>(
-        "button:not(:disabled),input,select",
-      );
+      const focus = [
+        ...ui.querySelectorAll<HTMLElement>(
+          "button:not(:disabled):not(.dialogue-back):not(.phone-only),input,select",
+        ),
+      ].find((control) => control.getClientRects().length > 0);
       focus?.focus({ preventScroll: true });
     });
   }
@@ -234,6 +256,7 @@ class Game {
     if (!this.world.ready || !this.caseActive) return;
     const payload: Save & { pendingResponse: boolean } = {
       version: 2,
+      proofRevision: 2,
       state: this.state,
       position: [this.world.position.x, this.world.position.z],
       stage: this.stage,
@@ -242,6 +265,8 @@ class Game {
       demo: this.demo,
       savedAt: Date.now(),
       pendingResponse: this.pendingResponse,
+      navigation: this.navigation,
+      arrivalIndex: this.stage === "arrival" ? this.arrivalIndex : undefined,
     };
     try {
       localStorage.setItem("blackrook-case", JSON.stringify(payload));
@@ -303,7 +328,7 @@ class Game {
         el(
           "div",
           "title-foot",
-          "A binary-tree mystery · Keyboard & mouse · Local, offline play",
+          "A binary-tree mystery · Touch or keyboard · Local saves",
         ),
         el(
           "div",
@@ -324,6 +349,7 @@ class Game {
     this.demo = false;
     this.pendingResponse = false;
     this.navigation = "";
+    this.arrivalIndex = 0;
     this.world.resetCast();
     this.world.teleport(...(layout.spawn as [number, number]));
     this.save();
@@ -341,12 +367,13 @@ class Game {
     this.action = save.action;
     this.ending = save.ending;
     this.demo = save.demo;
+    this.navigation = save.navigation || "";
     this.pendingResponse = !!(save as Save & { pendingResponse?: boolean })
       .pendingResponse;
     this.world.resetCast();
     this.world.teleport(...save.position);
     if (this.stage === "letter") this.letter();
-    else if (this.stage === "arrival") this.arrival(0);
+    else if (this.stage === "arrival") this.arrival(save.arrivalIndex || 0);
     else if (this.stage === "ending") this.showEnding(this.ending!);
     else if (this.pendingResponse && this.state.path.length)
       this.responseFromHistory();
@@ -377,6 +404,7 @@ class Game {
       el(
         "div",
         "actions",
+        button("Return to title", () => this.title(), "phone-only"),
         button(
           "Accept the request  →",
           () => {
@@ -395,6 +423,8 @@ class Game {
   }
   private arrival(index: number) {
     this.stage = "arrival";
+    this.arrivalIndex = index;
+    this.save();
     this.world.player.visible = true;
     this.world.actors.get("scarlet")?.position.set(4.8, 0, 3.5);
     this.world.followPlayer();
@@ -426,6 +456,7 @@ class Game {
     );
   }
   private explore() {
+    if (this.world.endingId) this.world.resetCast();
     this.modelStage.hide();
     this.treeUI.stop();
     this.speechBubble = null;
@@ -438,15 +469,22 @@ class Game {
     this.world.player.visible = true;
     this.world.clearKeys();
     this.world.followPlayer();
+    this.touch.setActive(true);
     this.onEscape = () => this.pause();
     this.choices = [];
     ui.replaceChildren();
     this.sound.duck(false);
+    this.sound.resume();
+    this.sound.room(this.world.room);
     this.hud();
     this.save();
   }
   private hud() {
-    if (["title", "loading", "letter"].includes(this.view)) {
+    if (
+      !this.caseActive ||
+      this.stage === "ending" ||
+      ["title", "loading", "letter"].includes(this.view)
+    ) {
       hud.replaceChildren();
       return;
     }
@@ -460,24 +498,38 @@ class Game {
     const room = this.state.path.length === 0 ? "study" : d?.room;
     let hint =
       this.state.path.length === 0
-        ? "Find the fallen King in the Study and press E."
+        ? matchMedia("(pointer: coarse), (max-width: 700px)").matches
+          ? "Approach the fallen King and tap Investigate."
+          : "Find the fallen King in the Study and press E."
         : d
           ? "Find your next lead in " + roomName(room || "study") + "."
           : "All five statements are recorded. Keep searching or open case review.";
-    if (this.navigation)
-      hint =
-        "Destination: " +
-        roomName(this.navigation) +
-        ". See the floor plan in your notebook.";
+    const destination = this.navigation || room;
+    if (destination && destination !== this.world.room) {
+      const route = roomRoute(layout, this.world.room, destination);
+      hint = "Route: " + route.map(roomName).join(" → ");
+    }
     const tools = el(
       "nav",
       "hud-tools",
-      button("Notebook [J]", () => this.notebook(), "small"),
-      button("Floor plan", () => this.notebook("map"), "small"),
+      button(
+        matchMedia("(pointer: coarse), (max-width: 700px)").matches
+          ? "Notebook"
+          : "Notebook [J]",
+        () => this.notebook(),
+        "small",
+      ),
+      button(
+        matchMedia("(pointer: coarse), (max-width: 700px)").matches
+          ? "Map"
+          : "Floor plan",
+        () => this.notebook("map"),
+        "small",
+      ),
       button("Pause", () => this.pause(), "small"),
     );
     tools.setAttribute("aria-label", "Case controls");
-    if (this.state.path.length === 6 && this.stage !== "ending")
+    if (this.state.path.length === 6)
       tools.prepend(button("Case review", () => this.review(), "small"));
     const bits = this.state.path.length
       ? this.state.path.map((b) => (b ? "R" : "L")).join(" · ")
@@ -604,7 +656,12 @@ class Game {
     const dialogue = el(
       "section",
       "dialogue",
-      el("div", "speaker", speaker),
+      el(
+        "div",
+        "speaker",
+        el("span", "", speaker),
+        button("Back", escape, "dialogue-back"),
+      ),
       text(copy),
       controls,
     );
@@ -614,8 +671,7 @@ class Game {
     const suspect = story.suspects.find(
       (s) => s.name === speaker || s.id === speaker.toLowerCase(),
     );
-    const actorId =
-      suspect?.id || (speaker.includes("Knight") ? "knight" : "knight");
+    const actorId = suspect?.id || "knight";
     const portrait = el("div", "comic-model");
     portrait.setAttribute("aria-hidden", "true");
     const comic = el(
@@ -629,7 +685,8 @@ class Game {
       "dialogue",
       escape,
     );
-    this.modelStage.show("CHR_" + actorId, portrait, "portrait");
+    if (!matchMedia("(max-width: 700px), (pointer: coarse)").matches)
+      this.modelStage.show("CHR_" + actorId, portrait, "portrait");
     this.speechBubble = dialogue;
     this.speechActor =
       suspect?.id || (speaker.includes("Knight") ? "knight" : null);
@@ -864,17 +921,17 @@ class Game {
       [
         "poison",
         "Poison",
-        "A physical link to the additional substance in the drink.",
+        "Compare the flask, goblet residue and medicine register.",
       ],
       [
         "motive",
         "Financial motive",
-        "Evidence that the estate accounts conceal diverted funds.",
+        "Corroborate the study ledger with account fragments or testimony.",
       ],
       [
         "opportunity",
         "Opportunity",
-        "A statement establishing access or presence at the study.",
+        "Witness testimony, or matching study-delivery and duty-book records.",
       ],
     ] as const;
     const list = el("div", "proof-list");
@@ -903,8 +960,14 @@ class Game {
                         k === "poison"
                           ? story.proofRule.poison.includes(id)
                           : k === "motive"
-                            ? story.proofRule.motiveAny.includes(id)
-                            : story.proofRule.opportunityAny.includes(id),
+                            ? [
+                                ...story.proofRule.motiveAll,
+                                ...story.proofRule.motiveAny,
+                              ].includes(id)
+                            : [
+                                ...story.proofRule.opportunityAny,
+                                ...story.proofRule.opportunityAll,
+                              ].includes(id),
                       )
                       .map(evidenceName)
                       .join(" / "),
@@ -934,34 +997,53 @@ class Game {
       if (id === tab) bookmark.setAttribute("aria-current", "page");
       nav.append(bookmark);
     }
-    if (tab === "physical" || tab === "testimony") {
+    if (tab === "testimony") {
+      const statements = history(this.state).slice(1);
+      if (!statements.length)
+        content.append(
+          text(
+            "No statements recorded. Follow your current lead and choose one question.",
+            "empty",
+          ),
+        );
+      for (const statement of statements)
+        content.append(
+          el(
+            "article",
+            "entry",
+            el("small", "", statement.speaker),
+            el("h3", "", statement.label),
+            text(statement.response),
+            el(
+              "small",
+              "",
+              "Recorded: " + statement.evidence.map(evidenceName).join(" · "),
+            ),
+          ),
+        );
+    }
+    if (tab === "physical") {
       const ids = this.state.evidence.filter(
-        (id) =>
-          (story.evidence[id as EvidenceId].category === "testimony") ===
-          (tab === "testimony"),
+        (id) => story.evidence[id as EvidenceId].category === "physical",
       );
       if (!ids.length)
         content.append(
           text(
-            tab === "physical"
-              ? "No physical clues recorded. Approach an object and press E to inspect it."
-              : "No statements recorded. Follow your current lead and choose one question.",
+            "No physical clues recorded. Approach an object and press E to inspect it.",
             "empty",
           ),
         );
       for (const id of ids) {
         const e = story.evidence[id as EvidenceId];
+        const source =
+          id === "weapon_origin" && this.state.path[0] !== 0
+            ? "Prince Ash · describes the letter opener"
+            : roomName(e.source);
         content.append(
           el(
             "article",
             "entry",
-            el(
-              "small",
-              "",
-              e.source in Object.fromEntries(layout.rooms.map((r) => [r.id, 1]))
-                ? roomName(e.source)
-                : e.source,
-            ),
+            el("small", "", source),
             el("h3", "", evidenceIcon(id), e.title),
             text(e.text),
           ),
@@ -973,7 +1055,7 @@ class Game {
         eye("What the evidence establishes"),
         this.proofRows(),
         text(
-          "Motive alone is insufficient. A sound case connects the drink, the accounts and an opportunity.",
+          "Motive alone is insufficient. Compare the drink, the draught and its dosage record. Corroborate the accounts with the study ledger. Witnesses or matching delivery records can establish opportunity; you can keep searching after every statement is recorded.",
           "review-note",
         ),
         text(
@@ -987,20 +1069,38 @@ class Game {
         );
     }
     if (tab === "map") {
+      content.classList.add("floor-plan-entries");
       const map = drawFloorPlan({
         image: this.world.captureFloorPlan(),
         currentRoom: this.world.room,
-        destination: this.navigation,
+        destination:
+          this.navigation || currentDecision(story, this.state)?.room || "",
         position: this.world.position,
         onChooseRoom: (id, name) => {
-          this.navigation = id;
+          this.navigation = id === this.world.room ? "" : id;
           this.explore();
-          notify("Destination marked: " + name);
+          notify(
+            id === this.world.room
+              ? "You are already in " + name
+              : "Destination marked: " + name,
+          );
         },
       });
       content.append(
         text("North ↑ · Select a room to mark a destination.", "map-caption"),
         map,
+        text(
+          roomRoute(
+            layout,
+            this.world.room,
+            this.navigation ||
+              currentDecision(story, this.state)?.room ||
+              this.world.room,
+          )
+            .map(roomName)
+            .join(" → "),
+          "map-caption",
+        ),
         el(
           "p",
           "map-caption map-legend",
@@ -1319,7 +1419,7 @@ class Game {
       this.ending === "mara"
         ? "Your accusation selected a wrongful verdict. Motives and possession did not establish who poisoned the drink."
         : p.complete
-          ? "The flask establishes poison; the financial record establishes motive; witness testimony establishes opportunity. These three categories secured Checkmate before the confrontation."
+          ? "The flask, goblet and medicine register connect the draught to the fatal drink. The study ledger corroborates the diverted funds. Witness testimony or matching delivery records establish opportunity. These three categories secured Checkmate before the confrontation."
           : this.ending === "fire"
             ? "You committed to the final lead without securing all three proof categories. Voss destroyed the remaining evidence during the confrontation."
             : "You accused Voss with an incomplete case. Suspicion identified him, but the available evidence did not secure his arrest.";
@@ -1473,6 +1573,17 @@ class Game {
     );
   }
   private gallery(back: () => void = () => this.title()) {
+    // A gallery scene borrows the cast without changing the active case.
+    if (this.stage === "ending" && this.ending)
+      this.world.stageEnding(this.ending);
+    else {
+      this.world.resetCast();
+      if (this.caseActive) this.world.followPlayer();
+      else {
+        this.world.player.visible = false;
+        this.world.focusRoom("study");
+      }
+    }
     const seen = getGallery();
     const grid = el("div", "gallery-grid");
     for (const id of Object.keys(story.endings) as Ending[]) {
@@ -1541,7 +1652,12 @@ class Game {
         }),
       ),
     );
-    if (this.stage === "world")
+    content.append(
+      button("Photographic model viewer", () =>
+        this.photoMenu(() => this.presentation(back)),
+      ),
+    );
+    if (this.caseActive && this.stage === "world")
       content.append(
         el(
           "div",
@@ -1557,9 +1673,6 @@ class Game {
             if (t) this.world.teleport(t.x + 0.9, t.z + 0.8);
             this.explore();
           }),
-          button("Photographic model viewer", () =>
-            this.photoMenu(() => this.presentation(back)),
-          ),
         ),
       );
     content.append(
@@ -1589,13 +1702,20 @@ class Game {
     for (const bit of complete ? [1, 1, 1, 1, 1, 1] : [0, 0, 0, 0, 0, 0])
       this.state = choose(story, this.state, bit);
     if (complete) {
-      this.state = inspect(story, this.state, "poison_flask");
-      this.state = inspect(story, this.state, "burned_accounts");
+      for (const id of [
+        "poison_flask",
+        "goblet_residue",
+        "medicine_register",
+        "study_ledger",
+        "burned_accounts",
+      ])
+        this.state = inspect(story, this.state, id);
     }
     this.stage = "world";
     this.action = undefined;
     this.ending = undefined;
     this.pendingResponse = false;
+    this.navigation = "";
     this.demo = true;
     this.world.resetCast();
     this.world.teleport(4.5, 13.5);
@@ -1713,6 +1833,16 @@ class Game {
     const key = event.key.toLowerCase();
     const target = event.target as HTMLElement | null;
 
+    if (
+      event.repeat &&
+      this.world.modal &&
+      ["enter", " ", "escape", "1", "2"].includes(key)
+    ) {
+      event.preventDefault();
+      return;
+    }
+    if (!event.repeat && key !== "tab") void this.sound.start();
+
     if (key === "tab" && this.world.modal) {
       const controls = [
         ...ui.querySelectorAll<HTMLElement>(
@@ -1826,6 +1956,7 @@ class Game {
       demo: this.demo,
       settings: { ...this.settings },
       proof: proof(this.state),
+      navigation: this.navigation,
       traversal: this.treeUI.snapshot,
       stats: this.world.stats(),
       audioActive: this.sound.active,

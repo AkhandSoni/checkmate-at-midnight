@@ -1,6 +1,6 @@
 /**
  * Pure narrative engine. No DOM, rendering, timers, or randomness.
- * case.json is the authority; the supplied engine is kept as a parity reference.
+ * case.json defines the authored choices and corroboration requirements.
  */
 export type CaseData = typeof import("./data/case.json");
 export type EndingId = keyof CaseData["endings"];
@@ -99,8 +99,12 @@ export function proofStatus(caseData: CaseData, state: CaseState) {
   const evidence = new Set(state.evidence);
   const rule = caseData.proofRule;
   const poison = rule.poison.every((id) => evidence.has(id));
-  const motive = rule.motiveAny.some((id) => evidence.has(id));
-  const opportunity = rule.opportunityAny.some((id) => evidence.has(id));
+  const motive =
+    rule.motiveAll.every((id) => evidence.has(id)) &&
+    rule.motiveAny.some((id) => evidence.has(id));
+  const opportunity =
+    rule.opportunityAny.some((id) => evidence.has(id)) ||
+    rule.opportunityAll.every((id) => evidence.has(id));
   return {
     poison,
     motive,

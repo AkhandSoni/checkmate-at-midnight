@@ -1167,6 +1167,20 @@ body[data-game-view="review"] .actions {
   gap: 0;
   isolation: isolate;
 }
+.bound-notebook .floor-plan-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.bound-notebook .floor-plan-entries .map-caption {
+  margin: 0;
+}
+.bound-notebook .floor-plan-entries .floor-plan {
+  flex: none;
+  /* Leave room for a two-line route and its legend on 720px laptop screens. */
+  width: min(100%, max(220px, calc((100dvh - 425px) * 1.47)));
+  margin: 0 auto;
+}
 .floor-plan-render {
   position: absolute;
   inset: 0;

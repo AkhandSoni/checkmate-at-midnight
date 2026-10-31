@@ -34,7 +34,7 @@
       },
       {
         "label": "Examine the goblet.",
-        "response": "Pale residue clings to the rim beside the King’s usual medicine bottle.",
+        "response": "Pale residue with a sharp, bitter scent clings to the goblet beside the King’s normal medicine bottle. The drink needs to be compared with the household’s medicine and its dosage records.",
         "evidence": ["goblet_residue"]
       }
     ]
@@ -49,7 +49,7 @@
       "name": "Lady Scarlet",
       "piece": "queen",
       "room": "drawing",
-      "opening": "Yes, the fabric is mine. Surely you expected the murderer to choose someone else’s colour?",
+      "opening": "I sent for you because I feared for his life. Now everyone looks at my torn shawl as though it answers every question.",
       "choices": [
         {
           "label": "Explain the torn shawl.",
@@ -71,7 +71,7 @@
       "opening": "He could make you feel small without ever leaving his chair.",
       "choices": [
         {
-          "label": "Your crest is on the weapon.",
+          "label": "Explain the family-crested letter opener.",
           "response": "It was my gift to him. Yes, I took the new will. He had removed me as heir. But anyone could have picked up that opener.",
           "evidence": ["ash_motive", "weapon_origin"]
         },
@@ -90,7 +90,7 @@
       "opening": "I found him. That is all. Why does everyone keep saying it like a confession?",
       "choices": [
         {
-          "label": "Only you had access to the medicine.",
+          "label": "Explain your access to the medicine.",
           "response": "I prepared his normal dose, as I do every night. The strong draught is missing. I do not know how. If I say another word you will turn that against me too.",
           "evidence": ["mara_access"]
         },
@@ -125,16 +125,16 @@
       "name": "Chancellor Voss",
       "piece": "bishop",
       "room": "library",
-      "opening": "Private correspondence, Detective. Surely grief does not abolish privacy.",
+      "opening": "The estate papers are private, Detective. Surely grief does not abolish privacy.",
       "choices": [
         {
           "label": "Who benefits from the King’s death?",
-          "response": "A wife preparing to leave. A son stripped of his inheritance. You have seen the weapon and the shawl. Must I explain what they mean?",
+          "response": "A wife preparing to leave. A son stripped of his inheritance. His letter opener bore Ash’s crest, and Scarlet’s shawl was torn. Must I explain what they mean?",
           "evidence": ["voss_deflection"]
         },
         {
           "label": "Show me the estate accounts.",
-          "response": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+          "response": "The ledger is in the study. Yes, estate funds went into my holdings, but His Majesty approved those transfers. My private papers have no bearing on his death. You are making a grave mistake.",
           "evidence": ["fraud", "voss_contradiction"]
         }
       ]
@@ -144,7 +144,7 @@
     {
       "id": "red_thread",
       "room": "drawing",
-      "text": "A thread caught on a nail in the dining chair matches Scarlet’s shawl. Her account of the tear is plausible.",
+      "text": "A thread caught on a nail in the chair moved here after dinner matches Scarlet’s shawl. The damaged rail offers an innocent explanation for the tear.",
       "localXZ": [-1.6, 1.3]
     },
     {
@@ -156,37 +156,37 @@
     {
       "id": "medicine_register",
       "room": "servants",
-      "text": "The concentrated draught was nearly full this morning. Mara’s normal dose is separately recorded.",
+      "text": "The register describes the concentrated draught’s pale residue and sharp, bitter scent, and warns that a large dose is fatal. That bottle is missing. Mara’s normal, harmless dose is recorded separately.",
       "localXZ": [-1.7, 1.0]
     },
     {
       "id": "duty_book",
       "room": "entrance",
-      "text": "Flint’s departure began before the collapse. His absence explains why the delivery went unchallenged.",
+      "text": "Flint’s signed duty book records an unguarded study corridor shortly before midnight. A delivery from the Chancellor’s office is logged in that interval; the recipient’s copy should be in the study.",
       "localXZ": [1.8, 1.2]
     },
     {
       "id": "poison_flask",
       "room": "library",
-      "text": "A travel flask in Voss’s document case bears the same distinctive residue and scent as the missing concentrated draught.",
+      "text": "A travel flask in Voss’s document case is labelled as concentrated sleeping draught. Pale residue with a sharp, bitter scent clings to its mouth. Compare it with the drink and the medicine register.",
       "localXZ": [1.2, 0.7]
     },
     {
       "id": "burned_accounts",
       "room": "library",
-      "text": "An unburned account number matches a missing study-ledger page: estate funds were diverted into Voss’s holdings.",
+      "text": "The surviving scrap records estate funds paid into Voss’s private holdings. Its page number is legible; the study ledger could establish which account it belongs to.",
       "localXZ": [-1.3, 1.0]
     },
     {
       "id": "study_ledger",
       "room": "study",
-      "text": "The numbered ledger has missing leaves. Voss’s scheduled delivery is noted on its cover.",
+      "text": "The estate ledger records a delivery signed by Voss shortly before midnight. Numbered leaves are missing from the transfers section; compare any surviving account records with these entries.",
       "localXZ": [0.7, 0.8]
     },
     {
       "id": "goblet_residue",
       "room": "study",
-      "text": "The goblet has pale residue beside the King’s normal medicine bottle. It suggests an additional substance.",
+      "text": "Pale residue with a sharp, bitter scent clings to the goblet beside the King’s normal medicine bottle. The drink needs to be compared with the household’s medicine and its dosage records.",
       "localXZ": [-1.2, -0.6]
     }
   ],
@@ -216,10 +216,10 @@
       "category": "testimony"
     },
     "weapon_origin": {
-      "title": "Weapon Origin",
-      "source": "Prince Ash",
-      "text": "It was my gift to him. Yes, I took the new will. He had removed me as heir. But anyone could have picked up that opener.",
-      "category": "testimony"
+      "title": "Crest on the letter opener",
+      "source": "study",
+      "text": "The letter opener bears Ash’s family crest. Ownership alone does not establish who used it.",
+      "category": "physical"
     },
     "bitter_wine": {
       "title": "Bitter Wine",
@@ -266,25 +266,25 @@
     "voss_deflection": {
       "title": "Voss Deflection",
       "source": "Chancellor Voss",
-      "text": "A wife preparing to leave. A son stripped of his inheritance. You have seen the weapon and the shawl. Must I explain what they mean?",
+      "text": "A wife preparing to leave. A son stripped of his inheritance. His letter opener bore Ash’s crest, and Scarlet’s shawl was torn. Must I explain what they mean?",
       "category": "testimony"
     },
     "fraud": {
-      "title": "Fraud",
+      "title": "Disputed estate transfers",
       "source": "Chancellor Voss",
-      "text": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+      "text": "The ledger is in the study. Yes, estate funds went into my holdings, but His Majesty approved those transfers. My private papers have no bearing on his death. You are making a grave mistake.",
       "category": "testimony"
     },
     "voss_contradiction": {
-      "title": "Voss Contradiction",
+      "title": "Voss’s account of the transfers",
       "source": "Chancellor Voss",
-      "text": "The ledger is in the study. Those transfers were approved by His Majesty. That scrap in the fire proves nothing. You are making a grave mistake.",
+      "text": "The ledger is in the study. Yes, estate funds went into my holdings, but His Majesty approved those transfers. My private papers have no bearing on his death. You are making a grave mistake.",
       "category": "testimony"
     },
     "red_thread": {
       "title": "Red Thread",
       "source": "drawing",
-      "text": "A thread caught on a nail in the dining chair matches Scarlet’s shawl. Her account of the tear is plausible.",
+      "text": "A thread caught on a nail in the chair moved here after dinner matches Scarlet’s shawl. The damaged rail offers an innocent explanation for the tear.",
       "category": "physical"
     },
     "torn_will": {
@@ -296,37 +296,37 @@
     "medicine_register": {
       "title": "Medicine Register",
       "source": "servants",
-      "text": "The concentrated draught was nearly full this morning. Mara’s normal dose is separately recorded.",
+      "text": "The register describes the concentrated draught’s pale residue and sharp, bitter scent, and warns that a large dose is fatal. That bottle is missing. Mara’s normal, harmless dose is recorded separately.",
       "category": "physical"
     },
     "duty_book": {
       "title": "Duty Book",
       "source": "entrance",
-      "text": "Flint’s departure began before the collapse. His absence explains why the delivery went unchallenged.",
+      "text": "Flint’s signed duty book records an unguarded study corridor shortly before midnight. A delivery from the Chancellor’s office is logged in that interval; the recipient’s copy should be in the study.",
       "category": "physical"
     },
     "poison_flask": {
       "title": "Poison Flask",
       "source": "library",
-      "text": "A travel flask in Voss’s document case bears the same distinctive residue and scent as the missing concentrated draught.",
+      "text": "A travel flask in Voss’s document case is labelled as concentrated sleeping draught. Pale residue with a sharp, bitter scent clings to its mouth. Compare it with the drink and the medicine register.",
       "category": "physical"
     },
     "burned_accounts": {
       "title": "Burned Accounts",
       "source": "library",
-      "text": "An unburned account number matches a missing study-ledger page: estate funds were diverted into Voss’s holdings.",
+      "text": "The surviving scrap records estate funds paid into Voss’s private holdings. Its page number is legible; the study ledger could establish which account it belongs to.",
       "category": "physical"
     },
     "study_ledger": {
       "title": "Study Ledger",
       "source": "study",
-      "text": "The numbered ledger has missing leaves. Voss’s scheduled delivery is noted on its cover.",
+      "text": "The estate ledger records a delivery signed by Voss shortly before midnight. Numbered leaves are missing from the transfers section; compare any surviving account records with these entries.",
       "category": "physical"
     },
     "goblet_residue": {
       "title": "Goblet Residue",
       "source": "study",
-      "text": "The goblet has pale residue beside the King’s normal medicine bottle. It suggests an additional substance.",
+      "text": "Pale residue with a sharp, bitter scent clings to the goblet beside the King’s normal medicine bottle. The drink needs to be compared with the household’s medicine and its dosage records.",
       "category": "physical"
     },
     "low_bleeding": {
@@ -339,45 +339,47 @@
   "endings": {
     "scarlet": {
       "title": "The Scarlet Verdict",
-      "text": "You present the torn shawl, the argument, and Scarlet’s plans to leave. “I wrote for help,” she says. “Remember that when you tell them what happened here.” Flint escorts her away. At dawn, Voss burns the remaining accounts. The camera reveals another red thread still caught on the dining-room chair.",
+      "text": "You name Lady Scarlet. “I wrote for help,” she says. “Remember that when you tell them what happened here.” Flint escorts her away. At dawn, Voss burns the remaining accounts. Another red thread is still caught on the chair Scarlet used at dinner.",
       "epitaph": "You found a motive. Someone else supplied the evidence.",
       "shot": "Scarlet crosses the entrance threshold; cut to the snagged thread and Voss at the hearth."
     },
     "ash": {
       "title": "The Fallen Heir",
-      "text": "The threat, stolen will and family-crested weapon seem to form a complete story. Ash places his coronet on the dining table. “I wanted him to listen. Just once.” After his arrest, the camera returns to the goblet beneath the desk.",
+      "text": "You name Prince Ash. He places his coronet on the dining table. “I wrote the threat. I wanted him to listen. Just once. I did not kill him.” Flint takes him away. The goblet remains in the study, holding the clue your accusation failed to explain.",
       "epitaph": "The threat was his. The murder was not.",
       "shot": "Hold on the abandoned coronet, then rack attention to the goblet."
     },
     "mara": {
       "title": "The Disposable Pawn",
-      "text": "Mara prepared the medicine, possessed the keys and discovered the body. “You asked who could have done it,” she says. “You never asked who used me.” She leaves her key ring on her bed. Voss volunteers to give a statement against her.",
+      "text": "You name Mara. “I prepared his medicine and found him,” she says. “That does not mean I killed him. You never asked who used me.” She leaves her key ring on her bed. Voss volunteers to give a statement against her.",
       "epitaph": "The smallest piece carried the blame for the largest crime.",
       "shot": "Empty servants’ room, key ring on white linen; bishop’s shadow falls across the doorway."
     },
     "voss_free": {
       "title": "The Bishop Walks Free",
-      "text": "You identify Voss, but your evidence does not tie him securely to the fatal drink and its delivery. “You have described suspicions, Detective,” he replies. “You were called here for proof.” He leaves pending further investigation. Days later, a parcel reaches your office. Inside is a black bishop.",
+      "text": "You identify Voss, but your case leaves a crucial link unsupported. “You have described suspicions, Detective,” he replies. “You were called here for proof.” He leaves pending further investigation. Days later, a parcel reaches your office. Inside is a black bishop.",
       "epitaph": "You named the killer. You could not hold him.",
       "shot": "Open gates at dawn, followed by a bishop resting on the opened letter."
     },
     "fire": {
       "title": "The Burning Board",
-      "text": "You pursue Voss before securing the case. He burns the accounts and knocks a candle stand into the library curtain. Flint breaks down the door. You help evacuate the household while Voss escapes through the smoke. “Five lives saved,” you say. “One case lost.”",
+      "text": "You pursue Voss before securing the case. He burns the remaining accounts and knocks a candle stand into the library curtain. Flint forces his way in. You help evacuate the household while Voss escapes through the smoke. Everyone else is safe, but the gaps in your evidence remain. The surviving notes cannot yet prove the murder.",
       "epitaph": "You brought everyone out except the truth.",
       "shot": "Exterior entrance silhouette, safe household grouped outside, smoke at upper windows. No extra playable room."
     },
     "checkmate": {
       "title": "Checkmate",
-      "text": "You assemble the household in the study. Voss calls the wound proof of a family quarrel. You set down the goblet. “The wound is where you wanted us to begin.” You connect the stolen draught, Voss’s access and visit, and the stolen accounts. The injury drew attention away from the drink. Flint takes the bishop into custody. “Did you know from the beginning?” Scarlet asks. “No,” you reply. “That is why I kept asking.”",
+      "text": "You assemble the household in the study. Voss points to the wound and talks of a family quarrel. You set down the goblet, his flask and the dosage register. “The wound is where you wanted us to begin.” The draught links his flask to the fatal drink; the estate ledger corroborates his diverted funds. His access to the King is established in your case notes. The injury drew attention away from the drink. Flint takes the bishop into custody. “Did you know from the beginning?” Scarlet asks. “No,” you reply. “That is why I kept investigating.”",
       "epitaph": "Checkmate. The truth survives until morning.",
       "shot": "Household tableau in study; detective slides a miniature knight beside the bishop on the desk chessboard."
     }
   },
   "proofRule": {
-    "poison": ["poison_flask"],
+    "poison": ["poison_flask", "goblet_residue", "medicine_register"],
+    "motiveAll": ["study_ledger"],
     "motiveAny": ["fraud", "burned_accounts"],
-    "opportunityAny": ["voss_visit", "flint_saw_voss", "borrowed_keys"]
+    "opportunityAny": ["voss_visit", "flint_saw_voss", "borrowed_keys"],
+    "opportunityAll": ["study_ledger", "duty_book"]
   },
   "actions": [
     "accuse_scarlet",

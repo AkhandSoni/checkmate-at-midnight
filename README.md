@@ -20,11 +20,12 @@ You are Detective Knight. Walk the rooms, question the household and decide what
 - A cast of dressed chess pieces, led by a horse-headed detective in a fedora.
 - Two questions at every committed story decision.
 - Physical clues, witness statements and a personal case notebook.
-- An overhead mansion map that marks your next destination.
+- An overhead mansion map with routes through the connected rooms.
+- A phone joystick, nearby-object investigate button and touch menu.
 - Multiple verdicts, with a recap of the choices that brought you there.
 - Local saves, an ending gallery, music and sound settings.
 
-There is no real-time countdown. Take your time. Read the evidence twice.
+There is no real-time countdown. Take your time. Read the evidence twice. Every question route can still be solved through careful room searches before you commit a verdict.
 
 ## Controls
 
@@ -40,7 +41,9 @@ There is no real-time countdown. Take your time. Read the evidence twice.
 | M              | Mute / restore sound     |
 | Arrows + Enter | Navigate menus           |
 
-The game targets keyboard/mouse desktop play in a WebGL 2 browser. Disable soft shadows in Settings on slower machines. Saves stay in the browser where you play.
+On a phone, drag the joystick to move, tap the nearby-object button to investigate, and use **Menu** to pause or change settings. **Notebook**, **Map** and dialogue choices support touch. Portrait and landscape layouts are available; releasing the joystick, opening a panel or rotating the phone clears movement.
+
+A WebGL 2 browser is required. Phones start with soft shadows disabled and a lower rendering resolution; Settings can override shadows. Saves stay in the browser where you play.
 
 ## The DSA behind the investigation
 
@@ -78,7 +81,19 @@ npm run build
 npm run preview
 ```
 
-The tests cover the story rules, tree structure, DFS/BFS, save validation and chess-position viewer, including 81,920 route/clue/action combinations. The production build goes into `dist/`. GitHub Actions tests and deploys pushes to `main`; `BASE_PATH=/checkmate-at-midnight/` supports the Pages project URL.
+The logic tests cover 81,920 route/clue/action combinations, recovery of all 64 question routes, tree structure, DFS/BFS, notebook consistency, connected navigation and chess positions.
+
+With the dev server running, run the desktop and phone browser checks in another terminal:
+
+```bash
+npm run test:browser
+npm run test:mobile
+GAME_URL=http://127.0.0.1:5173 npm run test:layout
+```
+
+The browser checks use system Chromium when available. Otherwise run `npx playwright install chromium`; `CHROMIUM_PATH` can select another Chromium installation. JSON reports and screenshots go into `test-results/`. `test:layout` also works against `npm run preview` on its default port 4173. Browser save checks exercise 960 legacy cases, their updated equivalents, and forged outcomes.
+
+The player audit and fixes are documented in [PLAYTEST_REPORT.md](PLAYTEST_REPORT.md) (contains spoilers). The production build goes into `dist/`. GitHub Actions tests and deploys pushes to `main`; `BASE_PATH=/checkmate-at-midnight/` supports the Pages project URL.
 
 Players need no installation, backend, account or Blender. The game uses TypeScript, Three.js, Vite and browser LocalStorage. Asset credits and licences are in [ASSET_CREDITS.md](ASSET_CREDITS.md) and [public/legal/](public/legal).
 

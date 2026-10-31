@@ -39,6 +39,7 @@ export class World {
   readonly colliders: Rect[] = [];
   readonly walls: { group: THREE.Group; axis: "x" | "z"; value: number }[] = [];
   readonly keys = new Set<string>();
+  readonly touchMove = new THREE.Vector2();
   readonly player = new THREE.Group();
   readonly lean = new THREE.Group();
   readonly focus = new THREE.Vector3(12, 0, 4);
@@ -79,7 +80,12 @@ export class World {
       antialias: true,
       powerPreference: "high-performance",
     });
-    this.renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+    this.renderer.setPixelRatio(
+      Math.min(
+        devicePixelRatio,
+        matchMedia("(pointer: coarse)").matches ? 1.25 : 1.5,
+      ),
+    );
     this.renderer.setClearColor("#1d2224");
     this.renderer.shadowMap.enabled = settings.shadows;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -857,6 +863,8 @@ export class World {
   resize() {
     const w = innerWidth,
       h = innerHeight;
+    if (this.cameraMode === "follow")
+      this.cameraHeight = w < 700 && h > w ? 14.5 : 11.6;
     this.renderer.setSize(w, h);
     const a = w / h;
     this.camera.left = (-this.cameraHeight * a) / 2;
@@ -873,6 +881,7 @@ export class World {
   }
   clearKeys() {
     this.keys.clear();
+    this.touchMove.set(0, 0);
     this.velocity.set(0, 0, 0);
   }
   blocked(x: number, z: number) {
@@ -1200,18 +1209,24 @@ export class World {
     if (this.frames.length > 300) this.frames.shift();
     if (elapsed > 0 && !document.hidden) this.frames.push(elapsed);
     if (this.ready && !this.modal && this.cameraMode === "follow") {
-      const right =
+      let right =
         (this.keys.has("d") || this.keys.has("arrowright") ? 1 : 0) -
         (this.keys.has("a") || this.keys.has("arrowleft") ? 1 : 0);
-      const up =
+      let up =
         (this.keys.has("w") || this.keys.has("arrowup") ? 1 : 0) -
         (this.keys.has("s") || this.keys.has("arrowdown") ? 1 : 0);
+      const touchStrength = this.touchMove.length();
+      if (touchStrength > 0) {
+        right = this.touchMove.x;
+        up = -this.touchMove.y;
+      }
       const dir = new THREE.Vector3(
         (right - up) * Math.SQRT1_2,
         0,
         (-right - up) * Math.SQRT1_2,
       );
       if (dir.lengthSq() > 0) dir.normalize();
+      if (touchStrength > 0) dir.multiplyScalar(Math.min(1, touchStrength));
       const speed = this.keys.has("shift") ? 4.2 : 2.8;
       this.velocity.lerp(dir.multiplyScalar(speed), 1 - Math.exp(-14 * dt));
       const nx = this.position.x + this.velocity.x * dt,

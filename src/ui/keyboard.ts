@@ -24,10 +24,12 @@ export function navigateMenu(root: HTMLElement, event: KeyboardEvent): boolean {
   let columns = 1;
   if (grid) {
     choices = [...grid.querySelectorAll<HTMLElement>(selector)].filter(visible);
-    columns = Math.max(
-      1,
-      getComputedStyle(grid).gridTemplateColumns.split(" ").length,
-    );
+    columns = grid.classList.contains("floor-plan")
+      ? 3
+      : Math.max(
+          1,
+          getComputedStyle(grid).gridTemplateColumns.split(" ").length,
+        );
   }
   if (!choices.length) return false;
   const current = Math.max(0, choices.indexOf(active!));

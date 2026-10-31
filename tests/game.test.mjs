@@ -24,7 +24,13 @@ test("all six authored endings are reachable and complete proof protects the fin
   ])
     assert.equal(engine.resolveEnding(story, incomplete, action), ending);
   let complete = investigate([0, 0, 0, 0, 1, 0]);
-  for (const clue of ["poison_flask", "burned_accounts"])
+  for (const clue of [
+    "poison_flask",
+    "goblet_residue",
+    "medicine_register",
+    "study_ledger",
+    "burned_accounts",
+  ])
     complete = engine.inspect(story, complete, clue);
   assert.equal(
     engine.resolveEnding(story, complete, "accuse_voss"),
@@ -57,10 +63,14 @@ test("81,920 route/clue/action combinations preserve the canonical proof and ver
       assert.equal(evidence.size, found.evidence.length);
       const complete =
         evidence.has("poison_flask") &&
+        evidence.has("goblet_residue") &&
+        evidence.has("medicine_register") &&
+        evidence.has("study_ledger") &&
         (evidence.has("fraud") || evidence.has("burned_accounts")) &&
         (evidence.has("voss_visit") ||
           evidence.has("flint_saw_voss") ||
-          evidence.has("borrowed_keys"));
+          evidence.has("borrowed_keys") ||
+          (evidence.has("study_ledger") && evidence.has("duty_book")));
       for (const action of story.actions) {
         const expected =
           wrong[action] ||

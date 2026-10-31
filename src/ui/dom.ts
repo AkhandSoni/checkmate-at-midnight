@@ -20,8 +20,10 @@ export function button(label: string, fn: () => void, cls = "") {
   b.type = "button";
   // Decorative chess glyphs must not change a control's accessible name.
   if (label.trim()) b.setAttribute("aria-label", label);
-  b.addEventListener("click", (e) => {
-    if (e.detail > 1) return;
+  b.addEventListener("click", () => {
+    // Touch browsers count successive taps across newly rendered controls.
+    // Reject stale controls without suppressing the next screen's tap.
+    if (!b.isConnected || b.disabled) return;
     fn();
   });
   return b;

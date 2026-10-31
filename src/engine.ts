@@ -49,7 +49,7 @@ export const defaults: Settings = {
   effects: 0.55,
   mute: false,
   reducedMotion: matchMedia("(prefers-reduced-motion: reduce)").matches,
-  shadows: true,
+  shadows: !matchMedia("(pointer: coarse)").matches,
   presentation: false,
 };
 export function getSettings(): Settings {
@@ -61,7 +61,7 @@ export function getSettings(): Settings {
         Object.entries(s).filter(([k, v]) =>
           k === "music" || k === "effects"
             ? typeof v === "number" && v >= 0 && v <= 1
-            : typeof v === "boolean" && k in defaults,
+            : typeof v === "boolean" && Object.hasOwn(defaults, k),
         ),
       ),
     };
@@ -133,6 +133,7 @@ export function selectedNodes(s: State, action?: string) {
 }
 export type Save = {
   version: 2;
+  proofRevision?: 2;
   state: State;
   position: [number, number];
   stage: "letter" | "arrival" | "world" | "ending";
@@ -141,14 +142,22 @@ export type Save = {
   demo: boolean;
   savedAt: number;
   pendingResponse?: boolean;
+  navigation?: string;
+  arrivalIndex?: number;
 };
 export function loadSave(): { save: Save | null; error: string } {
-  const raw = localStorage.getItem("blackrook-case");
-  if (!raw) return { save: null, error: "" };
   try {
+    const raw = localStorage.getItem("blackrook-case");
+    if (!raw) return { save: null, error: "" };
     const r = JSON.parse(raw);
     if (
       r.version !== 2 ||
+      (r.proofRevision !== undefined && r.proofRevision !== 2) ||
+      (r.arrivalIndex !== undefined &&
+        (r.stage !== "arrival" ||
+          !Number.isInteger(r.arrivalIndex) ||
+          r.arrivalIndex < 0 ||
+          r.arrivalIndex >= story.arrival.length)) ||
       !["letter", "arrival", "world", "ending"].includes(r.stage) ||
       !Array.isArray(r.position) ||
       r.position.length !== 2 ||
@@ -163,20 +172,50 @@ export function loadSave(): { save: Save | null; error: string } {
       typeof r.savedAt !== "number" ||
       !Number.isFinite(r.savedAt) ||
       (r.pendingResponse !== undefined &&
-        typeof r.pendingResponse !== "boolean")
+        typeof r.pendingResponse !== "boolean") ||
+      (r.navigation !== undefined &&
+        r.navigation !== "" &&
+        !layout.rooms.some((room) => room.id === r.navigation))
     )
       throw Error();
     r.state = restore(story, r.state);
-    if ((r.stage === "letter" || r.stage === "arrival") && r.state.path.length)
+    if (
+      (r.stage === "letter" || r.stage === "arrival") &&
+      (r.state.path.length || r.state.evidence.length)
+    )
       throw Error();
     if (r.pendingResponse && (r.stage !== "world" || !r.state.path.length))
       throw Error();
     if (r.stage === "ending") {
-      if (
-        !story.actions.includes(r.action) ||
-        resolveEnding(story, r.state, r.action) !== r.ending
-      )
-        throw Error();
+      if (!story.actions.includes(r.action)) throw Error();
+      if (resolveEnding(story, r.state, r.action) !== r.ending) {
+        // Earlier cases used different corroboration and opportunity checks.
+        // Preserve the player's route and clues instead of discarding the save.
+        const evidence = new Set(r.state.evidence);
+        const legacyProof =
+          evidence.has("poison_flask") &&
+          story.proofRule.motiveAny.some((id) => evidence.has(id)) &&
+          story.proofRule.opportunityAny.some((id) => evidence.has(id));
+        const legacyEnding = legacyProof
+          ? "checkmate"
+          : r.action === "accuse_voss"
+            ? "voss_free"
+            : "fire";
+        if (
+          r.proofRevision !== undefined ||
+          r.ending !== legacyEnding ||
+          !["accuse_voss", "final_lead"].includes(r.action)
+        )
+          throw Error();
+        r.stage = "world";
+        delete r.action;
+        delete r.ending;
+        return {
+          save: r,
+          error:
+            "Your saved case has been reopened for the updated evidence checks. Continue to review your deductions; your choices and clues are preserved.",
+        };
+      }
     } else if (r.action || r.ending) throw Error();
     return { save: r, error: "" };
   } catch {
@@ -191,7 +230,14 @@ export function getGallery(): Ending[] {
   try {
     const r = JSON.parse(localStorage.getItem("blackrook-gallery") || "[]");
     return Array.isArray(r)
-      ? r.filter((id: unknown) => typeof id === "string" && id in story.endings)
+      ? [
+          ...new Set<Ending>(
+            r.filter(
+              (id: unknown) =>
+                typeof id === "string" && Object.hasOwn(story.endings, id),
+            ),
+          ),
+        ]
       : [];
   } catch {
     return [];
