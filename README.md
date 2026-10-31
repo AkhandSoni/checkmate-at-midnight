@@ -41,7 +41,7 @@ There is no real-time countdown. Take your time. Read the evidence twice. Every 
 | M              | Mute / restore sound     |
 | Arrows + Enter | Navigate menus           |
 
-On a phone, drag the joystick to move, tap the nearby-object button to investigate, and use **Menu** to pause or change settings. **Notebook**, **Map** and dialogue choices support touch. Portrait and landscape layouts are available; releasing the joystick, opening a panel or rotating the phone clears movement.
+On a phone, drag the joystick to move, tap the nearby-object button to investigate, and use **Menu** to pause or change settings. **Notebook**, **Map** and dialogue choices support touch. Phones play in **landscape**. Portrait shows a rotate prompt and freezes the current screen without losing progress. Fullscreen is requested when turning sideways or on the next tap; a Fullscreen button remains available if a gesture is required. Browsers without element fullscreen keep their navigation controls visible. Releasing the joystick, opening a panel or rotating the phone clears movement.
 
 A WebGL 2 browser is required. Phones start with soft shadows disabled and a lower rendering resolution; Settings can override shadows. Saves stay in the browser where you play.
 
@@ -88,6 +88,7 @@ With the dev server running, run the desktop and phone browser checks in another
 ```bash
 npm run test:browser
 npm run test:mobile
+npm run test:display
 GAME_URL=http://127.0.0.1:5173 npm run test:layout
 ```
 

@@ -864,7 +864,11 @@ export class World {
     const w = innerWidth,
       h = innerHeight;
     if (this.cameraMode === "follow")
-      this.cameraHeight = w < 700 && h > w ? 14.5 : 11.6;
+      this.cameraHeight = matchMedia(
+        "(pointer: coarse) and (orientation: landscape)",
+      ).matches
+        ? 9.8
+        : 11.6;
     this.renderer.setSize(w, h);
     const a = w / h;
     this.camera.left = (-this.cameraHeight * a) / 2;

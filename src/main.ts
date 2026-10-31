@@ -10,6 +10,7 @@ import { drawFloorPlan } from "./ui/floor-plan";
 import { ModelStage, characterModels } from "./ui/model-stage";
 import { navigateMenu } from "./ui/keyboard";
 import { TouchControls } from "./ui/touch-controls";
+import { PhoneDisplay } from "./ui/phone-display";
 import { roomRoute } from "./navigation";
 import { evidenceIcon } from "./ui/icons";
 import { TreeView } from "./ui/tree";
@@ -66,6 +67,8 @@ class Game {
   readonly sound: Sound;
   private readonly modelStage: ModelStage;
   private readonly touch: TouchControls;
+  private readonly phone: PhoneDisplay;
+  private phoneBlocked = false;
   private viewerIndex = 0;
   private boardFrame = 0;
   private boardFlipped = false;
@@ -99,6 +102,10 @@ class Game {
         if (this.view === "world") this.pause();
       },
     );
+    this.phone = new PhoneDisplay((blocked) => {
+      this.phoneBlocked = blocked;
+      this.syncPhoneDisplay();
+    });
     this.modelStage = new ModelStage((name) =>
       this.world.cloneModelAsset(name),
     );
@@ -193,6 +200,13 @@ class Game {
     this.updateSpeechTail();
     requestAnimationFrame((n) => this.frame(n));
   }
+  private syncPhoneDisplay() {
+    this.world.modal = this.phoneBlocked || this.view !== "world";
+    ui.inert = this.phoneBlocked;
+    hud.inert = this.phoneBlocked || this.view !== "world";
+    this.world.clearKeys();
+    this.touch.setActive(!this.phoneBlocked && this.view === "world");
+  }
   private modal(
     node: HTMLElement,
     view: string,
@@ -208,6 +222,8 @@ class Game {
     this.world.clearKeys();
     this.view = view;
     document.body.dataset.gameView = view;
+    this.syncPhoneDisplay();
+    this.phone.refresh();
     if (["model-viewer", "chessboard", "notebook", "tree"].includes(view))
       toast.classList.remove("show");
     this.onEscape = escape;
@@ -469,7 +485,8 @@ class Game {
     this.world.player.visible = true;
     this.world.clearKeys();
     this.world.followPlayer();
-    this.touch.setActive(true);
+    this.syncPhoneDisplay();
+    this.phone.refresh();
     this.onEscape = () => this.pause();
     this.choices = [];
     ui.replaceChildren();
@@ -1823,6 +1840,7 @@ class Game {
     }
   }
   private key(event: KeyboardEvent) {
+    if (this.phoneBlocked) return;
     if (
       event.defaultPrevented ||
       event.ctrlKey ||

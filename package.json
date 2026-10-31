@@ -11,6 +11,7 @@
     "test:browser": "node tests/player-browser.mjs",
     "test:layout": "node tests/player-layout.mjs",
     "test:mobile": "node tests/player-mobile.mjs",
+    "test:display": "node tests/phone-display.mjs",
     "deploy": "npm run build && npx --yes wrangler@4.153.0 deploy"
   },
   "dependencies": {

@@ -40,8 +40,8 @@ The two-choice investigation, both interrogation orders, six ending types, 127-n
 - Touch actions suppress the follow-up native click so opening dialogue cannot accidentally choose its first answer.
 - Successive taps work across newly rendered screens; the old global double-click filter could block continued dialogue.
 - Back and return controls make dialogue, verdicts and the opening letter usable without Escape.
-- Compact HUD, single-column dialogue and notebook pages, scrollable menus, and larger touch targets support portrait and landscape screens. Safe-area padding protects controls near notches and home indicators.
-- Phone rendering uses a lower pixel-ratio cap, defaults shadows off, and omits the second 3D portrait renderer during dialogue. The follow camera widens its view in portrait orientation.
+- Landscape is the required phone orientation. Portrait shows a rotate prompt and freezes the existing screen without losing progress. Safe-area padding protects controls near notches and home indicators. The landscape HUD, joystick, two-column menus/dialogue and map/sidebar layout leave more of the world visible.
+- Phone rendering uses a lower pixel-ratio cap, defaults shadows off, and omits the second 3D portrait renderer during dialogue. The landscape follow camera keeps characters and room details readable on short screens.
 
 ## Verification
 
@@ -51,6 +51,8 @@ The two-choice investigation, both interrogation orders, six ending types, 127-n
 - Collision exploration reaches all 20 interaction targets from the starting position. All seven doors are also crossed in both directions using held movement input.
 - Save compatibility checks cover 960 earlier cases, their current equivalents, and forged outcomes. Both newly insufficient and newly complete earlier cases retain their progress.
 - `npm run test:layout`: 48 rendered screen checks at 1280×720 and 1440×1000 cover screen bounds, horizontal overflow, menus, notebook pages, map legend and tree labels.
-- `npm run test:mobile`: Chromium touch emulation at 360×800, 390×844 and 844×390 covers joystick drags, cancellation, two-finger Menu use, touch choices, Back, notebook, map, saves, verdicts, endings and presentation screens. A normal case is completed by touch at 390×844.
+- `npm run test:mobile`: Chromium touch emulation at 667×375, 844×390 and 932×430 covers joystick drags, cancellation, two-finger Menu use, touch choices, Back, notebook, map, saves, verdicts, endings and presentation screens. A normal case is completed by touch at 844×390.
+
+`npm run test:display` additionally verifies the portrait gate, native fullscreen on a landscape gesture, freezing and resuming across rotation, respecting an explicit fullscreen exit, and fallback behavior when fullscreen is rejected or unsupported. The controller attempts native landscape locking when available; browser activation rules can require a tap before fullscreen.
 
 Reports and screenshots are written under `test-results/`. Desktop and phone checks use Chromium; physical iOS/Android devices and other browser engines have not been tested. The build retains Vite’s existing size advisory for the Three.js vendor chunk.

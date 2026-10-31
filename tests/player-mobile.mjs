@@ -19,9 +19,9 @@ const check = (message) => {
 };
 try {
   for (const viewport of [
-    { width: 360, height: 800 },
-    { width: 390, height: 844 },
+    { width: 667, height: 375 },
     { width: 844, height: 390 },
+    { width: 932, height: 430 },
   ]) {
     const context = await browser.newContext({
       viewport,
@@ -58,6 +58,23 @@ try {
             node.scrollWidth > node.clientWidth + 2
           )
             faults.push(node.className || node.id);
+        }
+        if (document.body.dataset.gameView === "world") {
+          const objective = document
+            .querySelector(".objective")
+            .getBoundingClientRect();
+          for (const node of document.querySelectorAll(
+            ".location, .hud-tools",
+          )) {
+            const r = node.getBoundingClientRect();
+            if (
+              objective.left < r.right &&
+              objective.right > r.left &&
+              objective.top < r.bottom &&
+              objective.bottom > r.top
+            )
+              faults.push("Objective overlaps " + node.className);
+          }
         }
         return faults;
       });
@@ -240,11 +257,12 @@ try {
       `Notebook, map selection, touch investigation, Back and save/resume at ${viewport.width}×${viewport.height}`,
     );
 
-    if (viewport.width === 390) {
+    if (viewport.width === 844) {
       for (const id of ["mara", "ash", "flint", "scarlet", "voss"])
         await question(id, 1);
       assert.equal((await snap()).view, "review");
       await tap("Keep investigating");
+      await capture("world-review");
       for (const id of ["poison_flask", "medicine_register", "study_ledger"]) {
         await interact(id);
         await page
@@ -278,10 +296,18 @@ try {
     assert.deepEqual((await snap()).traversal.visited, ["root"]);
     await page.getByRole("button", { name: /Close/ }).first().tap();
     await tap("Return to ending");
-    if (viewport.width === 390) {
-      await page.setViewportSize({ width: 844, height: 390 });
-      await capture("rotated-ending");
+    if (viewport.width === 844) {
+      const stateBeforeRotation = (await snap()).state;
+      await page.setViewportSize({ width: 390, height: 844 });
+      assert.equal(await page.locator(".rotate-screen").isVisible(), true);
+      assert.equal(
+        await page.locator("#ui").evaluate((node) => node.inert),
+        true,
+      );
       await page.setViewportSize(viewport);
+      assert.equal(await page.locator(".rotate-screen").isVisible(), false);
+      assert.deepEqual((await snap()).state, stateBeforeRotation);
+      await capture("rotated-ending");
     }
     await tap("New investigation");
     await tap("Return to title");

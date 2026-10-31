@@ -535,12 +535,90 @@
   }
 }
 
-@media (pointer: coarse) and (max-height: 500px) and (orientation: landscape) {
+/* Portrait keeps the current case intact while the player rotates the phone. */
+.rotate-screen[hidden],
+.phone-fullscreen-cta[hidden] {
+  display: none;
+}
+.rotate-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
+  background: #101013f7;
+  color: #fff;
+  text-align: center;
+  overflow: auto;
+}
+.rotate-card {
+  max-width: 390px;
+}
+.rotate-card h2 {
+  font-size: 44px;
+  margin: 18px 0;
+}
+.rotate-card p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #dedee4;
+}
+.rotate-card button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 12px;
+}
+.rotate-phone {
+  width: 64px;
+  height: 106px;
+  border: 3px solid #f7f1e4;
+  border-radius: 12px;
+  margin: 0 auto 28px;
+  display: grid;
+  place-items: center;
+  font:
+    48px Arial,
+    sans-serif;
+  color: #ff5268;
+  transform: rotate(-25deg);
+}
+.phone-portrait #ui,
+.phone-portrait #hud,
+.phone-portrait #touch-controls,
+.phone-portrait #toast {
+  visibility: hidden;
+}
+.phone-fullscreen-cta {
+  position: fixed;
+  z-index: 8;
+  bottom: max(10px, env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+  min-height: 44px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border-radius: 7px;
+  background: #101013dc;
+}
+body:not([data-game-view="world"]):not([data-game-view="title"]):not(
+    [data-game-view="pause"]
+  )
+  .phone-fullscreen-cta {
+  display: none;
+}
+
+@media (pointer: coarse) and (orientation: landscape) {
   .title-screen {
-    padding: 18px 32px;
+    padding: max(16px, env(safe-area-inset-top))
+      max(28px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom))
+      max(28px, env(safe-area-inset-left));
   }
   .title-inner {
-    max-width: none;
+    max-width: 940px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     column-gap: 30px;
@@ -554,7 +632,7 @@
     display: none;
   }
   .title-screen h1 {
-    font-size: 64px;
+    font-size: clamp(54px, 8vw, 78px);
     grid-row: 1;
   }
   .title-nav {
@@ -567,26 +645,300 @@
     padding: 7px 12px;
     font-size: 14px;
   }
+  .hud-top {
+    top: max(8px, env(safe-area-inset-top));
+    align-items: start;
+  }
+  .location {
+    flex: 0 1 170px;
+    min-height: 44px;
+    padding: 6px 10px;
+  }
+  .location h2 {
+    font-size: 21px;
+  }
+  .hud-top .spacer {
+    display: block;
+  }
+  .hud-tools {
+    max-width: none;
+    flex-wrap: nowrap;
+    border: 0;
+    padding: 0;
+    gap: 5px;
+    background: transparent;
+  }
+  .hud-tools button {
+    padding: 8px 10px;
+    background: #101013dc;
+  }
   .objective {
-    top: 70px;
-    right: auto;
-    max-width: 320px;
+    top: max(8px, env(safe-area-inset-top));
+    left: clamp(190px, 25vw, 260px);
+    right: clamp(240px, 30vw, 310px);
+    max-width: none;
+    min-height: 44px;
+    padding: 5px 10px;
+    background: #101013c9;
+    line-height: 1.25;
+  }
+  .objective .eyebrow {
+    display: none;
+  }
+  .objective strong {
+    font-size: 13px;
+    margin-bottom: 3px;
+  }
+  .objective > span {
+    font-size: 10px;
+  }
+  body:not([data-game-view="world"]) #hud,
+  body:not([data-game-view="world"]) #toast {
+    visibility: hidden;
+  }
+  .touch-controls {
+    bottom: max(10px, env(safe-area-inset-bottom));
   }
   .joystick {
-    width: 100px;
-    height: 100px;
+    width: clamp(84px, 24dvh, 104px);
+    height: clamp(84px, 24dvh, 104px);
+  }
+  .joystick-thumb {
+    width: 40px;
+    height: 40px;
+    left: calc(50% - 20px);
+    top: calc(50% - 20px);
   }
   .touch-hint {
     display: none;
   }
   .touch-actions {
+    width: clamp(116px, 16vw, 140px);
     padding-bottom: 0;
+    gap: 6px;
+  }
+  .touch-actions button {
+    font-size: 13px;
+    min-height: 44px;
+    padding: 8px;
+  }
+  .touch-actions .touch-investigate {
+    min-height: 52px;
+  }
+  #toast,
+  body[data-game-view="dialogue"] #toast {
+    top: 65px;
+    font-size: 11px;
+    padding: 8px 12px;
+    max-width: 58vw;
+  }
+  .dialogue-wrap.with-portrait {
+    width: min(900px, calc(100% - 24px));
+    bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .dialogue {
+    padding: 10px 16px;
+  }
+  .dialogue .speaker {
+    margin-bottom: 4px;
+    font-size: 13px;
   }
   .with-portrait .dialogue p {
-    max-height: 21dvh;
+    max-height: 20dvh;
+    font-size: 15px;
+    line-height: 1.4;
+    margin-bottom: 8px;
   }
   .choices {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .choices button {
+    min-height: 48px;
+    font-size: 13px;
+    padding: 8px 10px;
+  }
+  .dialogue .meta {
+    display: none;
+  }
+  .panel,
+  body[data-game-view="review"] .panel {
+    padding: 14px 20px;
+    max-height: calc(100dvh - 20px);
+  }
+  .panel-head {
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+  }
+  .panel-head h2 {
+    font-size: 30px;
+  }
+  .panel .title-nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: none;
+    gap: 8px;
+  }
+  .panel .title-nav button {
+    font-size: 14px;
+  }
+  .panel .title-nav button:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+  .review-actions,
+  .demo-controls {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  body[data-game-view="review"] .proof-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+  body[data-game-view="review"] .proof-row {
+    grid-template-columns: 18px minmax(0, 1fr);
+    padding: 8px 0;
+    gap: 5px;
+  }
+  body[data-game-view="review"] .proof-row b {
+    font-size: 13px;
+  }
+  body[data-game-view="review"] .proof-row p {
+    font-size: 12px;
+    line-height: 1.4;
+    margin: 6px 0;
+  }
+  body[data-game-view="review"] .proof-row small {
+    font-size: 10px;
+  }
+  body[data-game-view="review"] .panel > p {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+  body[data-game-view="review"] .panel > .review-note:last-of-type {
+    display: none;
+  }
+  .notebook-scrim {
+    padding: max(8px, env(safe-area-inset-top))
+      max(10px, env(safe-area-inset-right))
+      max(8px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+  }
+  .bound-notebook {
+    display: grid;
+    grid-template-columns: 100px minmax(0, 1fr);
+    height: calc(100dvh - 20px);
+  }
+  .bookmark-rail.tabs {
+    flex-direction: column;
+    gap: 7px;
+    padding: 14px 0 0;
+    align-self: start;
+  }
+  .bookmark-rail button {
+    flex: none;
+    width: 100%;
+    border-radius: 5px 0 0 5px;
+  }
+  .bookmark-rail button.active {
+    translate: 4px 0;
+  }
+  .notebook-volume {
+    padding: 6px 10px 0 6px;
+  }
+  .notebook-records {
+    padding: 12px 16px 8px;
+  }
+  .notebook-section-head {
+    margin-bottom: 8px;
+  }
+  .notebook-section-head .eyebrow {
+    display: none;
+  }
+  .notebook-section-head h3 {
+    font-size: 27px;
+  }
+  .notebook-page-number {
+    display: none;
+  }
+  .notebook-footer {
+    padding: 5px 0 6px;
+  }
+  .notebook-footer button {
+    width: auto;
+    margin-left: auto;
+    display: block;
+  }
+  .bound-notebook .floor-plan-entries {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(135px, 0.7fr);
+    grid-template-rows: auto auto auto;
+    align-content: center;
+    gap: 10px 14px;
+  }
+  .bound-notebook .floor-plan-entries .floor-plan {
+    grid-column: 1;
+    grid-row: 1 / span 3;
+    width: min(100%, max(180px, calc((100dvh - 135px) * 1.47)));
+    align-self: center;
+  }
+  .floor-plan-entries > .map-caption {
+    grid-column: 2;
+    align-self: center;
+  }
+  .bound-notebook .floor-plan-entries .map-caption {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .bound-notebook .entry h3 {
+    font-size: 18px;
+  }
+  .bound-notebook .entry p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .position-layout {
+    grid-template-columns: minmax(200px, 0.8fr) minmax(0, 1fr);
+    gap: 18px;
+  }
+  .position-board {
+    max-height: 62dvh;
+  }
+  .ending {
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+    left: auto;
+    bottom: max(10px, env(safe-area-inset-bottom));
+    width: clamp(320px, 46vw, 460px);
+    max-height: calc(100dvh - 20px);
+    padding: 12px 16px;
+  }
+  .ending h2 {
+    font-size: 30px;
+    margin-bottom: 8px;
+  }
+  .ending > .eyebrow {
+    font-size: 9px;
+    margin-bottom: 6px;
+  }
+  .ending .ending-copy {
+    font-size: 13px;
+    line-height: 1.5;
+    max-height: max(65px, calc(100dvh - 245px));
+    margin-bottom: 8px;
+  }
+  .ending .epitaph {
+    font-size: 13px;
+    margin-top: 8px;
+  }
+  .ending .actions {
+    margin-top: 8px;
+  }
+  .scene-label {
+    right: auto;
+    width: min(260px, 39vw);
+    padding: 8px 12px;
+  }
+  .scene-label h3 {
+    font-size: 18px;
   }
   .model-viewer-controls {
     min-height: 110px;
