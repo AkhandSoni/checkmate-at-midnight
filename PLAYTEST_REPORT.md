@@ -43,9 +43,20 @@ The two-choice investigation, both interrogation orders, six ending types, 127-n
 - Landscape is the required phone orientation. Portrait shows a rotate prompt and freezes the existing screen without losing progress. Safe-area padding protects controls near notches and home indicators. The landscape HUD, joystick, two-column menus/dialogue and map/sidebar layout leave more of the world visible.
 - Phone rendering uses a lower pixel-ratio cap, defaults shadows off, and omits the second 3D portrait renderer during dialogue. The landscape follow camera keeps characters and room details readable on short screens.
 
+## Customizable input
+
+- Menu / Pause and Settings both link to Controls.
+- Keyboard bindings support single-key remapping for movement, run, investigation, notebook, map, pause/back, fullscreen, audio, both choices and the DSA viewer. Duplicate or reserved assignments are rejected. Movement aliases are independent; releasing one does not cancel another held key. Esc remains a recovery key.
+- Shortcut labels follow the saved bindings. Draft bindings do not affect play until Save, and Cancel discards edits.
+- All six touch controls can be dragged independently and scaled from 70% to 170%, with a minimum touch target and safe-area clamping. A compact editor mode exposes controls beneath the size toolbar.
+- The default joystick is now 140 pixels wide and sits farther inward, with at least 32 pixels of bottom clearance at the tested phone sizes.
+- Layout and binding preferences are validated and stored in `blackrook-controls`, independently of investigation progress. Reset can restore just keyboard bindings, just the phone layout, or both.
+- Touch buttons activate once on release, including after a captured drag or when used with a second finger. The subsequent native click is suppressed so it cannot activate newly opened UI.
+- `npm run test:controls` tests actual remapped gameplay, touch drags and sizing, persistence through reload, save/cancel/reset, and unchanged investigation progress. Pure tests cover conflicting keys, damaged preferences, movement aliases and bounds at different phone sizes.
+
 ## Verification
 
-- `npm test`: 13 passing logic tests, including 81,920 route/clue/action combinations and recovery of every question route.
+- `npm test`: 17 passing logic tests, including 81,920 route/clue/action combinations and recovery of every question route.
 - `npm run build`: TypeScript and production bundle build pass.
 - `npm run test:browser`: actual WebGL gameplay covers every interaction target, both question orders, all six endings, 18 ending scenes, notebook, saves, gallery, chess viewer, settings and DFS/BFS controls.
 - Collision exploration reaches all 20 interaction targets from the starting position. All seven doors are also crossed in both directions using held movement input.

@@ -7,11 +7,12 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --test tests/game.test.mjs tests/chess-position.test.mjs tests/player-logic.test.mjs",
+    "test": "node --test tests/game.test.mjs tests/chess-position.test.mjs tests/player-logic.test.mjs tests/controls.test.mjs",
     "test:browser": "node tests/player-browser.mjs",
     "test:layout": "node tests/player-layout.mjs",
     "test:mobile": "node tests/player-mobile.mjs",
     "test:display": "node tests/phone-display.mjs",
+    "test:controls": "node tests/control-customization.mjs",
     "deploy": "npm run build && npx --yes wrangler@4.153.0 deploy"
   },
   "dependencies": {

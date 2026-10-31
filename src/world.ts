@@ -4,6 +4,7 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { RoundedBoxGeometry } from "three/addons/geometries/RoundedBoxGeometry.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { layout, story, type Settings } from "./engine";
+import { actionHeld, defaultControls, type Bindings } from "./controls";
 export type Target = {
   id: string;
   label: string;
@@ -39,6 +40,7 @@ export class World {
   readonly colliders: Rect[] = [];
   readonly walls: { group: THREE.Group; axis: "x" | "z"; value: number }[] = [];
   readonly keys = new Set<string>();
+  bindings: Bindings = defaultControls().bindings;
   readonly touchMove = new THREE.Vector2();
   readonly player = new THREE.Group();
   readonly lean = new THREE.Group();
@@ -1214,11 +1216,11 @@ export class World {
     if (elapsed > 0 && !document.hidden) this.frames.push(elapsed);
     if (this.ready && !this.modal && this.cameraMode === "follow") {
       let right =
-        (this.keys.has("d") || this.keys.has("arrowright") ? 1 : 0) -
-        (this.keys.has("a") || this.keys.has("arrowleft") ? 1 : 0);
+        (actionHeld(this.bindings, this.keys, "right") ? 1 : 0) -
+        (actionHeld(this.bindings, this.keys, "left") ? 1 : 0);
       let up =
-        (this.keys.has("w") || this.keys.has("arrowup") ? 1 : 0) -
-        (this.keys.has("s") || this.keys.has("arrowdown") ? 1 : 0);
+        (actionHeld(this.bindings, this.keys, "up") ? 1 : 0) -
+        (actionHeld(this.bindings, this.keys, "down") ? 1 : 0);
       const touchStrength = this.touchMove.length();
       if (touchStrength > 0) {
         right = this.touchMove.x;
@@ -1231,7 +1233,7 @@ export class World {
       );
       if (dir.lengthSq() > 0) dir.normalize();
       if (touchStrength > 0) dir.multiplyScalar(Math.min(1, touchStrength));
-      const speed = this.keys.has("shift") ? 4.2 : 2.8;
+      const speed = actionHeld(this.bindings, this.keys, "sprint") ? 4.2 : 2.8;
       this.velocity.lerp(dir.multiplyScalar(speed), 1 - Math.exp(-14 * dt));
       const nx = this.position.x + this.velocity.x * dt,
         nz = this.position.z + this.velocity.z * dt;

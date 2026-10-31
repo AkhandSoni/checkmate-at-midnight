@@ -36,12 +36,20 @@ There is no real-time countdown. Take your time. Read the evidence twice. Every 
 | E              | Inspect or speak         |
 | 1 / 2          | Select a dialogue choice |
 | J              | Open the notebook        |
+| G              | Open the floor plan      |
 | Esc            | Close a panel or pause   |
 | F              | Toggle fullscreen        |
 | M              | Mute / restore sound     |
 | Arrows + Enter | Navigate menus           |
 
 On a phone, drag the joystick to move, tap the nearby-object button to investigate, and use **Menu** to pause or change settings. **Notebook**, **Map** and dialogue choices support touch. Phones play in **landscape**. Portrait shows a rotate prompt and freezes the current screen without losing progress. Fullscreen is requested when turning sideways or on the next tap; a Fullscreen button remains available if a gesture is required. Browsers without element fullscreen keep their navigation controls visible. Releasing the joystick, opening a panel or rotating the phone clears movement.
+
+Use **Menu / Pause → Controls**, or **Settings → Controls**, to customize input:
+
+- **Keyboard bindings:** select a binding, press a new key, then save. Conflicting assignments are rejected. Movement supports a secondary key; Esc remains available to pause or go back.
+- **Arrange touch controls:** drag the joystick, Menu, Investigate, Notebook, Map and Case review independently. Select a control to resize it. **Move controls** hides the settings panel so you can reach controls underneath; **Sizes** brings it back. Save applies the layout; Cancel discards edits, and Reset restores defaults.
+
+The default joystick is 140 pixels wide and sits inward from the bottom-left corner. Custom positions scale with the screen and stay within its safe edges. Preferences use LocalStorage under `blackrook-controls`, separate from `blackrook-case` (progress), `blackrook-settings` (audio/video), and `blackrook-gallery` (endings). They stay in the same browser and do not sync across devices.
 
 A WebGL 2 browser is required. Phones start with soft shadows disabled and a lower rendering resolution; Settings can override shadows. Saves stay in the browser where you play.
 
@@ -89,6 +97,7 @@ With the dev server running, run the desktop and phone browser checks in another
 npm run test:browser
 npm run test:mobile
 npm run test:display
+npm run test:controls
 GAME_URL=http://127.0.0.1:5173 npm run test:layout
 ```
 

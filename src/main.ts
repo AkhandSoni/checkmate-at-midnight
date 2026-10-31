@@ -1,6 +1,7 @@
 import "./style.css";
 import "./ui/chess-theme.css";
 import "./ui/mobile.css";
+import "./ui/controls.css";
 import { assetUrl } from "./assets";
 import { World, type Target } from "./world";
 import { Sound } from "./audio";
@@ -11,6 +12,20 @@ import { ModelStage, characterModels } from "./ui/model-stage";
 import { navigateMenu } from "./ui/keyboard";
 import { TouchControls } from "./ui/touch-controls";
 import { PhoneDisplay } from "./ui/phone-display";
+import { editTouchLayout } from "./ui/control-layout";
+import {
+  actions,
+  actionForKey,
+  defaultControls,
+  isMovement,
+  keyName,
+  loadControls,
+  normalizeKey,
+  rebind,
+  CONTROL_STORAGE,
+  type Action,
+  type ControlPreferences,
+} from "./controls";
 import { roomRoute } from "./navigation";
 import { evidenceIcon } from "./ui/icons";
 import { TreeView } from "./ui/tree";
@@ -74,6 +89,9 @@ class Game {
   private boardFlipped = false;
   private viewerBack: () => void = () => {};
   settings = getSettings();
+  controls = loadControls();
+  private bindingCapture: ((event: KeyboardEvent) => void) | null = null;
+  private disposeLayout: (() => void) | null = null;
   state: State = startCase();
   stage: Save["stage"] = "world";
   action: string | undefined;
@@ -92,6 +110,7 @@ class Game {
   private caseActive = false;
   constructor() {
     this.world = new World(document.querySelector("#world")!, this.settings);
+    this.world.bindings = this.controls.bindings;
     this.sound = new Sound(this.settings);
     this.touch = new TouchControls(
       (right, down) => this.world.touchMove.set(right, down),
@@ -101,7 +120,19 @@ class Game {
       () => {
         if (this.view === "world") this.pause();
       },
+      {
+        notebook: () => {
+          if (this.view === "world") this.notebook();
+        },
+        map: () => {
+          if (this.view === "world") this.notebook("map");
+        },
+        review: () => {
+          if (this.view === "world") this.review();
+        },
+      },
     );
+    this.touch.setLayout(this.controls.mobile);
     this.phone = new PhoneDisplay((blocked) => {
       this.phoneBlocked = blocked;
       this.syncPhoneDisplay();
@@ -196,7 +227,7 @@ class Game {
     this.world.update(t);
     this.modelStage.render(this.settings.reducedMotion);
     this.updatePrompt();
-    this.touch.update(this.world.nearest);
+    this.touch.update(this.world.nearest, this.state.path.length === 6);
     this.updateSpeechTail();
     requestAnimationFrame((n) => this.frame(n));
   }
@@ -212,6 +243,9 @@ class Game {
     view: string,
     escape: () => void = () => {},
   ) {
+    this.bindingCapture = null;
+    this.disposeLayout?.();
+    this.disposeLayout = null;
     this.treeUI?.stop();
     this.modelStage?.hide();
     this.speechBubble = null;
@@ -517,7 +551,9 @@ class Game {
       this.state.path.length === 0
         ? matchMedia("(pointer: coarse), (max-width: 700px)").matches
           ? "Approach the fallen King and tap Investigate."
-          : "Find the fallen King in the Study and press E."
+          : "Find the fallen King in the Study and press " +
+            this.keyName("interact") +
+            "."
         : d
           ? "Find your next lead in " + roomName(room || "study") + "."
           : "All five statements are recorded. Keep searching or open case review.";
@@ -532,7 +568,7 @@ class Game {
       button(
         matchMedia("(pointer: coarse), (max-width: 700px)").matches
           ? "Notebook"
-          : "Notebook [J]",
+          : "Notebook [" + this.keyName("notebook") + "]",
         () => this.notebook(),
         "small",
       ),
@@ -590,23 +626,38 @@ class Game {
       el(
         "div",
         "controls",
-        el("div", "", el("kbd", "", "W A S D"), " / arrows  Move"),
         el(
           "div",
           "",
-          el("kbd", "", "E"),
+          el(
+            "kbd",
+            "",
+            (["up", "left", "down", "right"] as Action[])
+              .map((action) => this.keyName(action))
+              .join(" "),
+          ),
+          "  Move",
+        ),
+        el(
+          "div",
+          "",
+          el("kbd", "", this.keyName("interact")),
           " Investigate   ",
-          el("kbd", "", "1 / 2"),
+          el(
+            "kbd",
+            "",
+            this.keyName("choice1") + " / " + this.keyName("choice2"),
+          ),
           " Choose",
         ),
         el(
           "div",
           "",
-          el("kbd", "", "J"),
+          el("kbd", "", this.keyName("notebook")),
           " Notebook   ",
-          el("kbd", "", "Esc"),
+          el("kbd", "", this.keyName("pause")),
           " Pause   ",
-          el("kbd", "", "F"),
+          el("kbd", "", this.keyName("fullscreen")),
           " Fullscreen",
         ),
       ),
@@ -634,7 +685,10 @@ class Game {
       label += " · recorded";
     if (n.kind === "suspect" && current?.id === n.id)
       label += " · current lead";
-    prompt.replaceChildren(el("kbd", "", "E"), document.createTextNode(label));
+    prompt.replaceChildren(
+      el("kbd", "", this.keyName("interact")),
+      document.createTextNode(label),
+    );
     prompt.style.display = "block";
     prompt.style.left = p.x + "px";
     prompt.style.top = p.y + "px";
@@ -710,7 +764,8 @@ class Game {
     this.updateSpeechTail();
     this.choices = options.map((o, i) => {
       const b = button("", o.fn, binary ? "" : "continue");
-      if (binary) b.append(el("kbd", "", String(i + 1)));
+      if (binary)
+        b.append(el("kbd", "", this.keyName(i === 0 ? "choice1" : "choice2")));
       b.append(document.createTextNode(o.label));
       controls.append(b);
       return b;
@@ -721,7 +776,11 @@ class Game {
   private interact() {
     const t = this.world.nearestTarget();
     if (!t) {
-      notify("Move closer to a person or object, then press E.");
+      notify(
+        "Move closer to a person or object, then press " +
+          this.keyName("interact") +
+          ".",
+      );
       return;
     }
     this.world.clearKeys();
@@ -1046,7 +1105,7 @@ class Game {
       if (!ids.length)
         content.append(
           text(
-            "No physical clues recorded. Approach an object and press E to inspect it.",
+            "No physical clues recorded. Approach an object and use Investigate to inspect it.",
             "empty",
           ),
         );
@@ -1257,11 +1316,13 @@ class Game {
             "div",
             "review-actions",
             button(
-              "1  Make an accusation",
+              this.keyName("choice1") + "  Make an accusation",
               () => this.verdict("root"),
               "primary",
             ),
-            button("2  Pursue one final lead", () => this.finalLead()),
+            button(this.keyName("choice2") + "  Pursue one final lead", () =>
+              this.finalLead(),
+            ),
           ),
           el(
             "div",
@@ -1489,6 +1550,7 @@ class Game {
         ? [button("Notebook", () => this.notebook())]
         : []),
       button("Settings", () => this.showSettings(() => this.pause(resume))),
+      button("Controls", () => this.showControls(() => this.pause(resume))),
       button("DSA presentation", () =>
         this.presentation(() => this.pause(resume)),
       ),
@@ -1580,6 +1642,9 @@ class Game {
             "div",
             "actions",
             button("Fullscreen", () => void this.fullscreen()),
+            button("Controls", () =>
+              this.showControls(() => this.showSettings(back)),
+            ),
             button("Done", back, "primary"),
           ),
         ],
@@ -1589,6 +1654,206 @@ class Game {
       back,
     );
   }
+  private keyName(action: Action) {
+    return keyName(this.controls.bindings[action][0]);
+  }
+  private applyControls(controls: ControlPreferences) {
+    this.controls = structuredClone(controls);
+    this.world.bindings = this.controls.bindings;
+    this.world.clearKeys();
+    this.touch.setLayout(this.controls.mobile);
+    this.hud();
+    try {
+      localStorage.setItem(CONTROL_STORAGE, JSON.stringify(this.controls));
+    } catch {
+      notify(
+        "Control preferences work for this tab, but your browser could not save them.",
+      );
+    }
+  }
+  private showControls(back: () => void) {
+    this.modal(
+      this.panel(
+        "Controls",
+        "Make the game comfortable",
+        [
+          text(
+            "Change keyboard bindings or arrange and resize every phone control. Your preferences are saved in this browser, separately from your investigation.",
+          ),
+          el(
+            "div",
+            "control-menu",
+            button(
+              "Keyboard bindings",
+              () => this.editKeyboard(() => this.showControls(back)),
+              "primary",
+            ),
+            button("Arrange touch controls", () =>
+              this.editTouchControls(() => this.showControls(back)),
+            ),
+            button("Reset all controls", () => {
+              this.applyControls(defaultControls());
+              notify("Default controls restored.");
+              this.showControls(back);
+            }),
+          ),
+          el("div", "actions", button("Done", back)),
+        ],
+        back,
+      ),
+      "controls",
+      back,
+    );
+  }
+  private editTouchControls(back: () => void) {
+    const editor = editTouchLayout(
+      this.controls.mobile,
+      (mobile) => {
+        this.applyControls({ ...this.controls, mobile });
+        back();
+        notify("Touch layout saved.");
+      },
+      back,
+    );
+    this.modal(editor.element, "control-layout", back);
+    this.disposeLayout = editor.dispose;
+  }
+  private editKeyboard(back: () => void) {
+    const draft = structuredClone(this.controls);
+    const list = el("div", "binding-list");
+    const status = text(
+      "Select a binding, then press its new key. Esc cancels capture.",
+      "binding-status",
+    );
+    status.setAttribute("role", "status");
+    const buttons = new Map<string, HTMLButtonElement>();
+    const refresh = () => {
+      for (const [id, node] of buttons) {
+        const [action, slot] = id.split(":") as [Action, string];
+        const key = draft.bindings[action][Number(slot)];
+        node.textContent = key ? keyName(key) : "Add key";
+      }
+    };
+    for (const action of Object.keys(actions) as Action[]) {
+      const row = el(
+        "div",
+        "binding-row",
+        el("span", "", actions[action].label),
+      );
+      for (let slot = 0; slot < actions[action].keys.length; slot++) {
+        const node = button(
+          "",
+          () => {
+            this.bindingCapture = null;
+            refresh();
+            node.textContent = "Press a key…";
+            status.textContent =
+              "New key for " + actions[action].label + ". Esc cancels.";
+            this.bindingCapture = (event) => {
+              event.preventDefault();
+              event.stopPropagation();
+              if (event.repeat) return;
+              const key = normalizeKey(event.key);
+              if (key === "escape") {
+                this.bindingCapture = null;
+                refresh();
+                status.textContent = "Binding unchanged.";
+                return;
+              }
+              if (event.ctrlKey || event.altKey || event.metaKey) {
+                status.textContent =
+                  "Use a single key without Ctrl, Alt or Command.";
+                return;
+              }
+              try {
+                draft.bindings = rebind(draft.bindings, action, slot, key);
+                this.bindingCapture = null;
+                refresh();
+                status.textContent =
+                  actions[action].label +
+                  " → " +
+                  keyName(key) +
+                  ". Save to apply.";
+              } catch (error) {
+                status.textContent = (error as Error).message;
+              }
+            };
+          },
+          "binding-key",
+        );
+        node.setAttribute(
+          "aria-label",
+          "Change " +
+            actions[action].label +
+            (slot ? " secondary key" : " primary key"),
+        );
+        buttons.set(action + ":" + slot, node);
+        row.append(node);
+        if (slot) {
+          const remove = button(
+            "×",
+            () => {
+              this.bindingCapture = null;
+              draft.bindings[action].splice(1, 1);
+              refresh();
+              status.textContent = "Secondary key removed. Save to apply.";
+            },
+            "binding-remove",
+          );
+          remove.setAttribute(
+            "aria-label",
+            "Remove " + actions[action].label + " secondary key",
+          );
+          row.append(remove);
+        }
+      }
+      list.append(row);
+    }
+    refresh();
+    this.modal(
+      this.panel(
+        "Keyboard bindings",
+        "Your keys, your preference",
+        [
+          text(
+            "Esc always closes panels or pauses. Arrows, Enter and Tab still navigate menus. Each action needs a primary key; movement can also have a second key.",
+            "setting-note",
+          ),
+          status,
+          list,
+          el(
+            "div",
+            "actions",
+            button("Reset keyboard", () => {
+              this.bindingCapture = null;
+              draft.bindings = defaultControls().bindings;
+              refresh();
+              status.textContent = "Default keys restored. Save to apply.";
+            }),
+            button("Cancel", back),
+            button(
+              "Save bindings",
+              () => {
+                this.applyControls({
+                  ...this.controls,
+                  bindings: draft.bindings,
+                });
+                back();
+                notify("Keyboard bindings saved.");
+              },
+              "primary",
+            ),
+          ),
+        ],
+        back,
+        false,
+        true,
+      ),
+      "key-bindings",
+      back,
+    );
+  }
+
   private gallery(back: () => void = () => this.title()) {
     // A gallery scene borrows the cast without changing the active case.
     if (this.stage === "ending" && this.ending)
@@ -1841,6 +2106,10 @@ class Game {
   }
   private key(event: KeyboardEvent) {
     if (this.phoneBlocked) return;
+    if (this.bindingCapture) {
+      this.bindingCapture(event);
+      return;
+    }
     if (
       event.defaultPrevented ||
       event.ctrlKey ||
@@ -1848,13 +2117,16 @@ class Game {
       event.altKey
     )
       return;
-    const key = event.key.toLowerCase();
+    const key = normalizeKey(event.key);
+    const action = actionForKey(this.controls.bindings, key);
     const target = event.target as HTMLElement | null;
 
     if (
       event.repeat &&
       this.world.modal &&
-      ["enter", " ", "escape", "1", "2"].includes(key)
+      (["enter", " ", "escape"].includes(key) ||
+        action === "choice1" ||
+        action === "choice2")
     ) {
       event.preventDefault();
       return;
@@ -1919,46 +2191,50 @@ class Game {
     }
     if (target?.matches("input, select, textarea")) return;
     if (event.repeat) return;
-    if (key === "f") {
+    if (action === "fullscreen") {
+      event.preventDefault();
       void this.fullscreen();
       return;
     }
-    if (key === "m") {
+    if (action === "mute") {
+      event.preventDefault();
       this.settings.mute = !this.settings.mute;
       this.applySettings();
       notify(this.settings.mute ? "Audio muted" : "Audio restored");
       return;
     }
-    if ((key === "1" || key === "2") && this.choices.length) {
-      this.choices[Number(key) - 1]?.click();
+    if ((action === "choice1" || action === "choice2") && this.choices.length) {
+      event.preventDefault();
+      this.choices[action === "choice1" ? 0 : 1]?.click();
+      return;
+    }
+    if (action === "pause") {
+      event.preventDefault();
+      this.onEscape();
       return;
     }
     if (this.view !== "world") return;
-    if (key === "j") {
+    if (action === "notebook") {
+      event.preventDefault();
       this.notebook();
       return;
     }
-    if (key === "t") {
+    if (action === "map") {
+      event.preventDefault();
+      this.notebook("map");
+      return;
+    }
+    if (action === "tree") {
+      event.preventDefault();
       this.showTree(() => this.explore());
       return;
     }
-    if (key === "e") {
+    if (action === "interact") {
+      event.preventDefault();
       this.interact();
       return;
     }
-    if (
-      [
-        "w",
-        "a",
-        "s",
-        "d",
-        "arrowup",
-        "arrowdown",
-        "arrowleft",
-        "arrowright",
-        "shift",
-      ].includes(key)
-    ) {
+    if (action && isMovement(action)) {
       event.preventDefault();
       this.world.keys.add(key);
       void this.sound.start();
@@ -1973,6 +2249,7 @@ class Game {
       ending: this.ending,
       demo: this.demo,
       settings: { ...this.settings },
+      controls: structuredClone(this.controls),
       proof: proof(this.state),
       navigation: this.navigation,
       traversal: this.treeUI.snapshot,

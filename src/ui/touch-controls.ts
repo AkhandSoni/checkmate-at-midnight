@@ -1,5 +1,11 @@
 import { el, button } from "./dom";
 import type { Target } from "../world";
+import {
+  controlRect,
+  defaultControls,
+  type TouchId,
+  type TouchLayout,
+} from "../controls";
 
 /** Pointer capture keeps a dragged thumb on the stick until release or cancel. */
 export class TouchControls {
@@ -10,13 +16,15 @@ export class TouchControls {
   private pointer: number | null = null;
   private active = false;
   private target = "";
-  private suppressClick = false;
+  private layout: TouchLayout = defaultControls().mobile;
+  private controls: Record<TouchId, HTMLButtonElement>;
   private media = matchMedia("(pointer: coarse), (max-width: 700px)");
 
   constructor(
     private move: (right: number, down: number) => void,
     interact: () => void,
     menu: () => void,
+    extra: { notebook: () => void; map: () => void; review: () => void },
   ) {
     this.root.id = "touch-controls";
     this.root.setAttribute("aria-label", "Touch controls");
@@ -39,41 +47,25 @@ export class TouchControls {
       "touch-investigate primary",
     );
     this.investigate.disabled = true;
-    this.touchAction(menuButton, menu);
-    this.touchAction(this.investigate, interact);
-    this.root.append(
-      el(
-        "div",
-        "joystick-area",
-        this.stick,
-        el("span", "touch-hint", "Drag to move"),
-        help,
-      ),
-      el("div", "touch-actions", menuButton, this.investigate),
-    );
+    const notebook = button("Notebook", extra.notebook, "touch-notebook");
+    const map = button("Map", extra.map, "touch-map");
+    const review = button("Case review", extra.review, "touch-review");
+    review.hidden = true;
+    this.controls = {
+      joystick: this.stick,
+      menu: menuButton,
+      interact: this.investigate,
+      notebook,
+      map,
+      review,
+    };
+    for (const [id, control] of Object.entries(this.controls)) {
+      control.dataset.control = id;
+      this.root.append(control);
+    }
+    this.root.append(help);
     document.body.append(this.root);
-    document.addEventListener(
-      "pointerdown",
-      () => {
-        this.suppressClick = false;
-      },
-      true,
-    );
-    document.addEventListener(
-      "click",
-      (event) => {
-        // A native touch click can land on the dialogue replacing this control.
-        if (
-          this.suppressClick &&
-          (event.detail > 0 || (event as PointerEvent).pointerType === "touch")
-        ) {
-          this.suppressClick = false;
-          event.preventDefault();
-          event.stopImmediatePropagation();
-        }
-      },
-      true,
-    );
+    this.place();
     this.stick.addEventListener("pointerdown", (event) => {
       if (!this.active || this.pointer !== null || event.button !== 0) return;
       event.preventDefault();
@@ -91,27 +83,11 @@ export class TouchControls {
         if ((event as PointerEvent).pointerId === this.pointer) this.reset();
       });
     window.addEventListener("blur", () => this.reset());
-    window.addEventListener("resize", () => this.reset());
-    this.media.addEventListener("change", () => this.setActive(this.active));
-  }
-
-  /** A second finger must work while the joystick owns the primary pointer. */
-  private touchAction(control: HTMLButtonElement, action: () => void) {
-    control.addEventListener("pointerup", (event) => {
-      if (event.pointerType !== "touch" || !this.active || control.disabled)
-        return;
-      const bounds = control.getBoundingClientRect();
-      if (
-        event.clientX < bounds.left ||
-        event.clientX > bounds.right ||
-        event.clientY < bounds.top ||
-        event.clientY > bounds.bottom
-      )
-        return;
-      event.preventDefault();
-      this.suppressClick = true;
-      action();
+    window.addEventListener("resize", () => {
+      this.reset();
+      this.place();
     });
+    this.media.addEventListener("change", () => this.setActive(this.active));
   }
 
   private updatePointer(event: PointerEvent) {
@@ -144,8 +120,49 @@ export class TouchControls {
     this.reset();
   }
 
-  update(target: Target | null) {
+  setLayout(layout: TouchLayout) {
+    this.layout = structuredClone(layout);
+    this.reset();
+    this.place();
+  }
+
+  private place() {
+    const style = getComputedStyle(this.root);
+    const insets = {
+      left: parseFloat(style.paddingLeft) || 12,
+      right: parseFloat(style.paddingRight) || 12,
+      top: parseFloat(style.paddingTop) || 10,
+      bottom: parseFloat(style.paddingBottom) || 16,
+    };
+    for (const id of Object.keys(this.controls) as TouchId[]) {
+      const rect = controlRect(
+        this.layout,
+        id,
+        innerWidth,
+        innerHeight,
+        insets,
+      );
+      Object.assign(this.controls[id].style, {
+        left: rect.left + "px",
+        top: rect.top + "px",
+        width: rect.width + "px",
+        height: rect.height + "px",
+      });
+    }
+    const thumbSize =
+      controlRect(this.layout, "joystick", innerWidth, innerHeight).width *
+      0.34;
+    Object.assign(this.thumb.style, {
+      width: thumbSize + "px",
+      height: thumbSize + "px",
+      left: `calc(50% - ${thumbSize / 2}px)`,
+      top: `calc(50% - ${thumbSize / 2}px)`,
+    });
+  }
+
+  update(target: Target | null, reviewReady = false) {
     if (this.root.hidden) return;
+    this.controls.review.hidden = !reviewReady;
     const id = target?.id || "";
     if (id === this.target) return;
     this.target = id;

@@ -48,7 +48,8 @@ try {
   await page.screenshot({ path: output + "/portrait.png" });
   await page.setViewportSize({ width: 844, height: 390 });
   assert.equal(await page.locator(".rotate-screen").isVisible(), false);
-  assert.equal(await page.evaluate(() => !!document.fullscreenElement), false);
+  // Rotation may enter fullscreen immediately while activation is still available.
+  // Otherwise the first landscape tap must enter it.
   await enterHouse();
   await page.waitForFunction(() => !!document.fullscreenElement);
   assert.equal(await page.locator(".phone-fullscreen-cta").isVisible(), false);
